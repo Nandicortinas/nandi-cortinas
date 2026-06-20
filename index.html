@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nandi Cortinas & Decor — Orçamento de Costura</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0eeea;color:#1a1a1a;font-size:14px}
+header{background:#2c2c2a;color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:17px;font-weight:600;letter-spacing:0.02em}
+header p{font-size:12px;color:#aaa;margin-top:2px}
+.tabs{background:#fff;border-bottom:1px solid #ddd;padding:0 24px;display:flex;gap:0}
+.tab{padding:12px 20px;font-size:13px;cursor:pointer;border:none;background:none;color:#888;border-bottom:3px solid transparent;font-family:inherit;font-weight:500;transition:all 0.15s}
+.tab.active{color:#2c2c2a;border-bottom-color:#2c2c2a}
+.tab:hover:not(.active){color:#444;background:#f9f8f5}
+.container{max-width:1100px;margin:0 auto;padding:20px 16px}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border:1px solid #e0dfd8;border-radius:10px;padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:#f0eeea}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+label{font-size:12px;color:#666;display:block;margin-bottom:3px;font-weight:500}
+input,select,textarea{width:100%;font-size:13px;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-family:inherit;background:#fff;color:#1a1a1a;outline:none;transition:border-color 0.12s}
+input::placeholder,textarea::placeholder{color:#c2c0b8;opacity:0.7}
+input:focus,select:focus,textarea:focus{border-color:#666}
+.field{margin-bottom:10px}
+.metric{background:#f5f4f0;border-radius:7px;padding:10px 12px}
+.metric-label{font-size:11px;color:#888;margin-bottom:3px}
+.metric-value{font-size:20px;font-weight:600;color:#1a1a1a}
+.metric-value.green{color:#0f6e56}
+.btn{border:none;padding:9px 20px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity 0.12s}
+.btn-dark{background:#2c2c2a;color:#fff}
+.btn-dark:hover{opacity:0.83}
+.btn-outline{background:#fff;color:#2c2c2a;border:1px solid #ccc}
+.btn-outline:hover{background:#f5f4f0}
+.btn-red{background:#a32d2d;color:#fff}
+.btn-red:hover{opacity:0.83}
+.btn-full{width:100%;margin-top:6px}
+.divider{border:none;border-top:1px solid #eee;margin:12px 0}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f4f0;font-size:13px}
+.row:last-child{border-bottom:none}
+.empty{text-align:center;padding:24px;color:#bbb;font-size:13px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.tag-green{background:#e1f5ee;color:#0f6e56}
+.tag-amber{background:#faeeda;color:#854f0b}
+.tag-blue{background:#e6f1fb;color:#185fa5}
+.hist-card{background:#fff;border:1px solid #e0dfd8;border-radius:9px;padding:14px 18px;margin-bottom:10px}
+.peca-card{background:#f9f8f5;border:1px solid #e8e7e0;border-radius:8px;padding:14px;margin-bottom:10px;position:relative}
+.peca-num{position:absolute;top:10px;right:12px;font-size:11px;color:#aaa;font-weight:600}
+.remove-btn{background:none;border:none;color:#ccc;cursor:pointer;font-size:17px;padding:0 4px;line-height:1}
+.remove-btn:hover{color:#a32d2d}
+.section-badge{display:inline-block;background:#2c2c2a;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:10px;letter-spacing:0.05em}
+.total-bar{background:#2c2c2a;color:#fff;border-radius:8px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.total-bar span{font-size:13px;opacity:0.8}
+.total-bar strong{font-size:20px;font-weight:700;color:#5dcaa5}
+table.lista{width:100%;border-collapse:collapse;font-size:12px}
+table.lista th{background:#f5f4f0;padding:7px 10px;text-align:left;font-weight:600;color:#666;border-bottom:1px solid #eee}
+table.lista td{padding:7px 10px;border-bottom:1px solid #f5f4f0;vertical-align:top}
+table.lista tr:last-child td{border-bottom:none}
+table.lista tr:hover td{background:#fafaf8}
+.costura-preco{display:flex;gap:6px}
+.costura-preco span{background:#e1f5ee;color:#0f6e56;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px}
+@media(max-width:700px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.tabs{overflow-x:auto}}
+@media print{
+  header,.tabs,.no-print{display:none!important}
+  body{background:#fff;font-size:12px}
+  .container{padding:0;max-width:100%}
+  .panel{display:none!important}
+  .panel.active{display:block!important}
+  .print-page{page-break-after:always;padding:18px;border:none}
+  .print-page:last-child{page-break-after:avoid}
+}
+/* LOGIN */
+#login-overlay{position:fixed;inset:0;background:#2c2c2a;display:flex;align-items:center;justify-content:center;z-index:9999}
+#login-overlay.hidden{display:none}
+.login-box{background:#fff;border-radius:14px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.login-logo{font-size:28px;font-weight:700;color:#2c2c2a;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;margin-bottom:28px}
+.login-err{background:#fcebeb;color:#a32d2d;font-size:12px;padding:8px 12px;border-radius:6px;margin-bottom:14px;display:none}
+#user-bar{background:#1a1a18;color:#fff;padding:6px 24px;font-size:12px;display:flex;align-items:center;justify-content:space-between}
+#user-bar span{opacity:0.8}
+#user-bar button{background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:3px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit}
+#user-bar button:hover{background:rgba(255,255,255,0.1)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">🪟 Nandi Cortinas</div>
+    <div class="login-sub">Orçamento de Costura — Acesso restrito</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.app" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+    <button class="btn btn-dark btn-full" onclick="fazerLogin()" id="btn-login" style="margin-top:8px">Entrar</button>
+    <div style="font-size:11px;color:#aaa;margin-top:14px;text-align:center">Esqueceu a senha? Fale com o administrador.</div>
+  </div>
+</div>
+
+<!-- BARRA DO USUÁRIO -->
+<div id="user-bar" style="display:none">
+  <span>👤 <b id="user-nome"></b> <span id="user-role-badge" style="background:rgba(255,255,255,0.15);padding:1px 7px;border-radius:10px;font-size:10px;margin-left:6px"></span></span>
+  <button onclick="fazerLogout()">Sair</button>
+</div>
+
+<header>
+  <div>
+    <h1>🪟 Nandi Cortinas & Decor — Orçamento de Costura</h1>
+    <p>Tubarão · SC · (48) 3622-0008</p>
+  </div>
+  <div style="text-align:right;font-size:12px;color:#888" id="data-header"></div>
+</header>
+
+<div class="tabs">
+  <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
+  <button class="tab active" onclick="showTab('cliente',this)">Dados do Cliente</button>
+  <button class="tab" onclick="showTab('pecas',this)">Fichas de Peças</button>
+  <button class="tab" onclick="showTab('orcamento',this)">Orçamento</button>
+  <button class="tab" onclick="showTab('costura',this)">Lista de Costura</button>
+  <button class="tab" onclick="showTab('colocacao',this)">Lista de Colocação</button>
+  <button class="tab" onclick="showTab('historico',this)">Histórico</button>
+  <button class="tab" onclick="showTab('impressao',this)">🖨️ Impressão</button>
+  <button class="tab" onclick="showTab('fichatec',this)">📋 Ficha Técnica</button>
+</div>
+
+<div style="background:#fff3cd;border-bottom:1px solid #ffc107;padding:7px 24px;font-size:13px;display:flex;align-items:center;justify-content:space-between" id="cliente-bar" style="display:none">
+  <span>✏️ Editando: <b id="cliente-bar-nome">Novo Orçamento</b></span>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-outline" style="font-size:12px;padding:4px 12px" onclick="salvarClienteAtual()">💾 Salvar Cliente</button>
+    <button class="btn btn-outline" style="font-size:12px;padding:4px 12px" onclick="novoOrcamento()">➕ Novo Orçamento</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== ABA CLIENTES ===== -->
+<div id="tab-clientes" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <h2 style="font-size:15px;font-weight:600">Banco de Dados de Clientes</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px">Cada cliente tem seus próprios orçamentos salvos</p>
+    </div>
+    <button class="btn btn-dark" onclick="novoOrcamento()">➕ Novo Orçamento</button>
+  </div>
+
+  <div style="margin-bottom:14px">
+    <input type="text" id="busca-cliente" placeholder="🔍 Buscar cliente por nome, CPF ou telefone..." oninput="renderClientes()" style="font-size:14px;padding:10px 14px">
+  </div>
+
+  <div id="lista-clientes-db"></div>
+</div>
+
+<!-- ===== ABA CLIENTE ===== -->
+<div id="tab-cliente" class="panel active">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">Identificação</div>
+        <div class="field"><label>Vendedora</label>
+          <select id="col-vend" style="font-weight:700;font-size:15px;color:#2c2c2a">
+            <option value="">— Selecione a vendedora —</option>
+            <option value="899 - ANDRESA SORATO">899 — ANDRESA SORATO</option>
+            <option value="1.003 - ELISABETH DE SOUZA">1.003 — ELISABETH DE SOUZA</option>
+            <option value="1.039 - JANAINA SILVANO">1.039 — JANAINA SILVANO</option>
+            <option value="1.041 - ELIZABETE CARDOSO">1.041 — ELIZABETE CARDOSO</option>
+            <option value="2.095 - GISLAINE PEREIRA">2.095 — GISLAINE PEREIRA</option>
+            <option value="2.346 - HALICY NIERO">2.346 — HALICY NIERO</option>
+          </select>
+        </div>
+        <div class="field"><label>Cód. Cliente</label><input id="cod-cli" placeholder="ex: 1.000" oninput="mascaraCodCli(this)"></div>
+        <div class="field"><label>Nome do Cliente</label><input id="cli-nome" placeholder="Nome completo" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="field">
+          <label>CPF / CNPJ <span id="cpf-status" style="font-size:11px;font-weight:400;color:#888"></span></label>
+          <input id="cli-cpf" placeholder="000.000.000-00 ou 00.000.000/0000-00" oninput="mascaraCpfCnpj(this)" onblur="buscarPorCpfCnpj(this.value)" maxlength="18">
+        </div>
+        <div class="grid2">
+          <div class="field"><label>RG</label><input id="cli-rg" placeholder="RG"></div>
+          <div class="field"><label>Inscrição Estadual</label><input id="cli-ie" placeholder="I.E."></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Telefone Celular</label><input id="cli-cel" placeholder="(48) 9 9931-9845" oninput="mascaraTel(this)" maxlength="16"></div>
+          <div class="field"><label>Telefone Residencial</label><input id="cli-tel-res" placeholder="(48) 3622-0008" oninput="mascaraTel(this)" maxlength="15"></div>
+        </div>
+        <div class="field"><label>Telefone Comercial</label><input id="cli-tel-com" placeholder="(48) 3622-0008" oninput="mascaraTel(this)" maxlength="15"></div>
+        <div class="field"><label>E-mail</label><input id="cli-email" type="email" placeholder="email@exemplo.com"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Endereço do Cliente</div>
+        <div class="field">
+          <label>CEP <span id="cep-status" style="font-size:11px;font-weight:400;color:#888"></span></label>
+          <input id="cli-cep" placeholder="00000-000" maxlength="9" oninput="mascaraCep(this)" onblur="buscarCep(this.value)">
+        </div>
+        <div class="grid2" style="grid-template-columns:1fr 80px">
+          <div class="field"><label>Endereço</label><input id="cli-end" placeholder="Rua / Avenida"></div>
+          <div class="field"><label>Nº</label><input id="cli-num" placeholder="123"></div>
+        </div>
+        <div class="field"><label>Complemento</label><input id="cli-comp" placeholder="Apto, bloco, sala..."></div>
+        <div class="field"><label>Complemento 2</label><input id="cli-comp2" placeholder="Próximo..."></div>
+        <div class="field"><label>Edifício</label><input id="cli-edif" placeholder="Nome do edifício"></div>
+        <div class="field"><label>Bairro</label><input id="cli-bairro" placeholder="Bairro"></div>
+        <div class="grid3">
+          <div class="field" style="grid-column:1/3"><label>Cidade</label><input id="cli-cidade" placeholder="Cidade" value="Tubarão"></div>
+          <div class="field"><label>Estado</label><input id="cli-estado" placeholder="SC" value="SC"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="background:#fffde7;border-color:#f5e642">
+        <div class="card-title" style="color:#b8860b">Dados de Entrega / Colocação</div>
+        <div style="margin-bottom:12px">
+          <button class="btn btn-outline" style="font-size:12px;padding:5px 14px;width:100%;border-color:#e6c800;color:#7a6000" onclick="copiarEnderecoCliente()">📋 Copiar endereço do cliente</button>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Data de Colocação</label><input id="col-data" type="date" style="background:#fff9c4"></div>
+          <div class="field"><label>Hora de Colocação</label><input id="col-hora" type="time" value="09:00" style="background:#fff9c4"></div>
+        </div>
+        <div class="field">
+          <label>CEP <span id="col-cep-status" style="font-size:11px;font-weight:400;color:#888"></span></label>
+          <input id="col-cep" placeholder="00000-000" maxlength="9" oninput="mascaraCepCol(this)" onblur="buscarCepCol(this.value)" style="background:#fff9c4">
+        </div>
+        <div class="grid2" style="grid-template-columns:1fr 80px">
+          <div class="field"><label>Endereço</label><input id="col-end" placeholder="Rua / Avenida" style="background:#fff9c4"></div>
+          <div class="field"><label>Nº</label><input id="col-num" placeholder="Nº" style="background:#fff9c4"></div>
+        </div>
+        <div class="field"><label>Complemento</label><input id="col-comp" placeholder="Apto, bloco, sala..." style="background:#fff9c4"></div>
+        <div class="field"><label>Complemento 2</label><input id="col-comp2" placeholder="Próximo..." style="background:#fff9c4"></div>
+        <div class="field"><label>Edifício</label><input id="col-edif" placeholder="Nome do edifício" style="background:#fff9c4"></div>
+        <div class="field"><label>Bairro</label><input id="col-bairro" placeholder="Bairro" style="background:#fff9c4"></div>
+        <div class="grid3">
+          <div class="field" style="grid-column:1/3"><label>Cidade</label><input id="col-cidade" placeholder="Cidade" value="Tubarão" style="background:#fff9c4"></div>
+          <div class="field"><label>Estado</label><input id="col-estado" placeholder="SC" value="SC" style="background:#fff9c4"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Responsável / Portaria</div>
+        <div class="field"><label>Responsável pelo Recebimento</label><input id="resp-nome" placeholder="Nome do responsável"></div>
+        <div class="field"><label>Telefone do Responsável</label><input id="resp-tel" placeholder="Telefone"></div>
+        <div class="field"><label>Nome do Porteiro</label><input id="porteiro" placeholder="Nome do porteiro"></div>
+        <div class="field"><label>Horário Permitido de Entrega no Edifício</label><input id="horario-entrega" placeholder="ex: 08h às 18h"></div>
+        <div class="field"><label>Quantidade de Peças</label><input id="qtd-pecas" type="number" min="1" value="1"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Condição de Pagamento</div>
+        <div class="grid2">
+          <div class="field"><label>Forma de Pagamento</label>
+            <select id="pgto-forma">
+              <option>À Vista</option><option>Carnê</option><option>Cartão</option><option>Cheque</option><option>PIX</option>
+            </select>
+          </div>
+          <div class="field"><label>Entrada (R$)</label><input id="pgto-entrada" type="number" step="0.01" placeholder="0,00"></div>
+        </div>
+        <div class="field"><label>Observações</label><textarea id="cli-obs" rows="2"></textarea></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABA PEÇAS ===== -->
+<div id="tab-pecas" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div>
+      <h2 style="font-size:15px;font-weight:600">Fichas Técnicas de Peças</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px">Cada ficha corresponde a uma cortina/ambiente</p>
+    </div>
+    <button class="btn btn-dark" onclick="addPeca()">+ Nova Peça</button>
+  </div>
+  <div id="lista-pecas"><div class="card"><div class="empty">Clique em "Nova Peça" para começar.</div></div></div>
+</div>
+
+<!-- ===== ABA ORÇAMENTO ===== -->
+<div id="tab-orcamento" class="panel">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">Resumo do Orçamento — Caixa</div>
+        <div id="orc-itens"><div class="empty">Adicione peças na aba "Fichas de Peças".</div></div>
+        <div class="divider"></div>
+        <div class="row"><span style="font-size:12px;color:#888">Costura</span><span id="sum-costura">R$ 0,00</span></div>
+        <div class="row"><span style="font-size:12px;color:#888">Sobra</span><span id="sum-sobra">R$ 0,00</span></div>
+        <div class="row"><span style="font-size:12px;color:#888">Colocação</span><span id="sum-colocacao">R$ 0,00</span></div>
+        <div class="row"><span style="font-size:12px;color:#888">Viagem</span><span id="sum-viagem">R$ 0,00</span></div>
+        <div class="total-bar" style="margin-top:12px">
+          <span>Total do Orçamento</span>
+          <strong id="orc-total">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Condição de Pagamento</div>
+        <div class="grid2">
+          <div class="field"><label>Forma de Pagamento</label>
+            <select id="orc-pgto">
+              <option>À Vista</option><option>Carnê</option><option>Cartão</option><option>Cheque</option><option>PIX</option>
+            </select>
+          </div>
+          <div class="field"><label>Entrada (R$)</label><input id="orc-entrada" type="number" step="0.01" placeholder="0,00"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Data de Colocação</label><input id="orc-data-col" type="date"></div>
+          <div class="field"><label>Medida por</label><input id="orc-medida-por" placeholder="Nome"></div>
+        </div>
+        <div class="field"><label>M.O. Colocação (R$)</label><input id="orc-mo" type="number" step="0.01" placeholder="0,00" oninput="recalcOrc()"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">Dados do Cliente (resumo)</div>
+        <div style="font-size:13px;color:#444;line-height:2" id="orc-cli-resumo">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Produtos do Orçamento por Peça</div>
+        <div id="orc-produtos-lista"><div class="empty">Sem produtos cadastrados.</div></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-dark btn-full" onclick="salvarOrcamento()">Salvar Orçamento</button>
+        <button class="btn btn-outline btn-full" onclick="limparOrcamento()">Limpar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABA LISTA COSTURA ===== -->
+<div id="tab-costura" class="panel">
+  <div class="card">
+    <div class="card-title">Lista de Serviços de Costura e Colocação</div>
+    <div style="overflow-x:auto">
+    <table class="lista">
+      <thead><tr><th>Cód</th><th>Descrição</th><th>Uni</th><th>R$ Costura</th><th>R$ Cliente</th></tr></thead>
+      <tbody id="tb-costura"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABA LISTA COLOCAÇÃO ===== -->
+<div id="tab-colocacao" class="panel">
+  <div style="font-size:11px;color:#888;margin-bottom:12px">Tabela de Colocação — Tubarão/SC · 13 de abril de 2026</div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Instalação de Cortinas e Persianas</div>
+    <div style="overflow-x:auto">
+    <table class="lista">
+      <thead><tr><th>Cód</th><th>Descrição</th><th>Uni</th><th>R$ Cliente</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Persiana — Por Peça</td></tr>
+        <tr><td><b>531.822</b></td><td>PERSIANAS - VER, HOR 16, 25, 50, ROL, ROM, SHE, CAS, CEL, PLI. (TODOS OS MODELOS)</td><td><span class="tag tag-blue">PÇ</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 76,00</span></span></td></tr>
+        <tr><td><b>534.025</b></td><td>PERSIANAS - MOTORIZADA</td><td><span class="tag tag-blue">PÇ</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 96,00</span></span></td></tr>
+
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Cortina no Varão — Por Metro</td></tr>
+        <tr><td><b>534.026</b></td><td>CORTINA NO ILHÓS OU ARGOLA</td><td><span class="tag tag-blue">M</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 38,00</span></span></td></tr>
+
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Cortina no Tubo Suíço — Por Metro</td></tr>
+        <tr><td><b>534.027</b></td><td>CORTINA NO TUBO SUIÇO - 1 TUBO</td><td><span class="tag tag-blue">M</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 45,00</span></span></td></tr>
+        <tr><td><b>534.028</b></td><td>CORTINA NO TUBO SUIÇO - 2 TUBOS (SUPORTE DUPLO)</td><td><span class="tag tag-blue">M</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 52,00</span></span></td></tr>
+
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Cortina no Trilho Suíço Curvo — Por Metro</td></tr>
+        <tr><td><b>534.029</b></td><td>CORTINA NO TRILHO SUIÇO CURVO (SE USAR MAIS TRILHOS COBRAR 2X, 3X, 4X...)</td><td><span class="tag tag-blue">M</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 55,00</span></span></td></tr>
+
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Cortina no Trilho Suíço Reto — Por Metro</td></tr>
+        <tr><td><b>534.030</b></td><td>CORTINA NO TRILHO SUIÇO RETO (SE USAR MAIS TRILHOS COBRAR 2X, 3X, 4X...)</td><td><span class="tag tag-blue">M</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 55,00</span></span></td></tr>
+
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Cortina Motorizada Trilho Glidea — Por Metro</td></tr>
+        <tr><td><b>534.031</b></td><td>CORTINA NO TRILHO GLIDEA</td><td><span class="tag tag-blue">M</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 142,00</span></span></td></tr>
+
+        <tr><td colspan="4" style="background:#f5f4f0;font-weight:700;font-size:11px;color:#888;padding:6px 10px;text-transform:uppercase;letter-spacing:0.05em">Serviços Extras</td></tr>
+        <tr><td><b>534.032</b></td><td>CONFERIR MEDIDA DE PERSIANAS E CORTINAS</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 67,00</span></span></td></tr>
+        <tr><td><b>534.033</b></td><td>VESTIR CORTINA</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 20,00</span></span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Viagem</div>
+    <div style="overflow-x:auto">
+    <table class="lista">
+      <thead><tr><th>Cód</th><th>Destino</th><th>Uni</th><th>R$ Cliente</th></tr></thead>
+      <tbody>
+        <tr><td><b>531.823</b></td><td>LAGUNA (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 187,00</span></span></td></tr>
+        <tr><td><b>531.824</b></td><td>GRAVATAL (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 187,00</span></span></td></tr>
+        <tr><td><b>531.825</b></td><td>BRAÇO DO NORTE (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 187,00</span></span></td></tr>
+        <tr><td><b>531.826</b></td><td>JAGUARUNA (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 187,00</span></span></td></tr>
+        <tr><td><b>531.827</b></td><td>SANGÃO (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 187,00</span></span></td></tr>
+        <tr><td><b>531.828</b></td><td>IMBITUBA (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 220,00</span></span></td></tr>
+        <tr><td><b>531.829</b></td><td>GAROPABA (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 264,00</span></span></td></tr>
+        <tr><td><b>531.830</b></td><td>CRICIÚMA (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 264,00</span></span></td></tr>
+        <tr><td><b>531.831</b></td><td>ORLEANS (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 264,00</span></span></td></tr>
+        <tr><td><b>531.832</b></td><td>FLORIANÓPOLIS (e Região)</td><td><span class="tag tag-blue">UNI</span></td><td><span class="costura-preco"><span style="background:#faeeda;color:#854f0b">R$ 500,00</span></span></td></tr>
+        <tr><td><b>534.034</b></td><td>DEMAIS CIDADES — CONSULTAR GERÊNCIA (DISTÂNCIA ACIMA DE 150 KM)</td><td><span class="tag tag-blue">UNI</span></td><td><span style="font-size:12px;color:#888">Consultar</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="margin-top:10px;background:#fff3cd;border-radius:7px;padding:10px 14px;font-size:12px;color:#856404">
+      ⚠️ <b>Valor mínimo para instalação fora de Tubarão: R$ 950,00</b>
+    </div>
+  </div>
+
+  <div class="card" style="background:#f9f8f5;border-color:#e0dfd8">
+    <div style="font-size:12px;color:#666;line-height:1.8">
+      <b>⚠️ Atenção em colocações:</b><br>
+      Trilho Suíço Reto ou Curvo colocados em paralelo (2, 3, 4 ou mais) cobrar pela medida da quantidade de trilhos colocados.<br>
+      <span style="color:#888">Exemplo: Uma sacada com 3 barras de 6 metros cada de Trilho Curvo, em paralelo → R$ 55,00/m × 18m = <b>R$ 990,00</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABA HISTÓRICO ===== -->
+<div id="tab-historico" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span style="font-size:13px;color:#888" id="hist-count">0 orçamentos salvos</span>
+    <button class="btn btn-outline" onclick="limparHistorico()">Limpar Histórico</button>
+  </div>
+  <div id="lista-historico"><div class="card"><div class="empty">Nenhum orçamento salvo ainda.</div></div></div>
+</div>
+
+<!-- ===== ABA IMPRESSÃO ===== -->
+<div id="tab-impressao" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px" class="no-print">
+    <div>
+      <h2 style="font-size:15px;font-weight:600">Pré-visualização para Impressão</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px">Revise os dados e clique em imprimir</p>
+    </div>
+    <button class="btn btn-dark" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  </div>
+  <div id="area-impressao"></div>
+</div>
+
+<!-- ===== ABA FICHA TÉCNICA ===== -->
+<div id="tab-fichatec" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px" class="no-print">
+    <div>
+      <h2 style="font-size:15px;font-weight:600">Ficha Técnica de Costura e Colocação</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px">Impressão somente com dados técnicos das peças</p>
+    </div>
+    <button class="btn btn-dark" onclick="window.print()">🖨️ Imprimir Ficha Técnica</button>
+  </div>
+  <div id="area-fichatec"></div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ──────────────────────────────────────────────
+// DADOS DAS LISTAS
+// ──────────────────────────────────────────────
+const TIPOS_COSTURA = ['CORTINA','OUTRAS CORTINAS','ACENTO','ALMOFADA','TOLHA DE MESA','LENÇOL','COLCHA CASAL','COLCHA SOLTEIRO','TRAVESSEIRO','BANDÔ','AMERICANO','CORTINA PRONTA','ENXOVAL','OUTROS TIPOS DE COSTURA','PERSIANA','PERSIANA VERTICAL','PERSIANA HORIZONTAL 25 MM','PERSIANA HORIZONTAL 50 MM','PERSIANA ROMANA','PERSIANA ROLÔ','PERSIANA CASCADE','PERSIANA CELULAR','PERSIANA PLISSADA','PERSIANA PAINEL','PERSIANA PAINEL DECOR','PERSIANA SHADOW','PERSIANA DIAMOND','PERSIANA SUBLIME'];
+const LOCAIS = ['QUARTO CASAL','QUARTO SOLTEIRO','QUARTO VISITA','QUARTO FUNCIONÁRIA','QUARTO MENINA','QUARTO MENINO','QUARTO BEBÊ','BANHEIRO','BANHEIRO CASAL','BANHEIRO SOCIAL','SALA','SALA DE JANTAR','SALA DE ESTAR','COZINHA','COPA','ÁREA DE SERVIÇO','ESCRITÓRIO','CORREDOR','SALÃO DE FESTA','SALA DE TV','CLOSET','GARAGEM','ESCADA','SACADA','SALA DE JOGOS','ACADEMIA','PISCINA','OUTROS'];
+const ENGATES = ['ARGOLA','DESLIZANTE','ILHÓS','LAÇO','GANCHO'];
+const SUSTENTACOES = ['VARÃO','TRILHO TUBO','TRILHO RETO','TRILHO CURVO','CORDA DE AÇO'];
+const FORROS = ['COSTURADO NA CORTINA','SEM FORRO','SEPARADO DA CORTINA'];
+const PREGAS = ['AMERICANA','MACHO','EFEITO ILHÓS','FRANZIDA'];
+const BAINHA_OPTS = ['5 CM','10 CM','15 CM','20 CM','25 CM','30 CM','40 CM','50 CM','60 CM','70 CM','80 CM','90 CM','1 METRO'];
+const JANELA_OPTS = ['0 CM','5 CM','10 CM','15 CM','20 CM','25 CM','30 CM','40 CM','50 CM','60 CM','70 CM','80 CM','90 CM','1 METRO'];
+const CAIMENTO_OPTS = ['1 CM DO CHÃO','BEIJANDO O CHÃO','ARRASTANDO NO CHÃO'];
+const FOLHAS_OPTS = ['1 FOLHA','2 FOLHAS','3 FOLHAS','4 FOLHAS','5 FOLHAS','6 FOLHAS','7 FOLHAS','8 FOLHAS','9 FOLHAS','10 FOLHAS'];
+const ABERTURA_OPTS = ['DIREITA','ESQUERDA','MEIO'];
+const MONTAGEM_OPTS = ['PAREDE','TETO','DENTRO DO VÃO'];
+const MONTAGEM_LOCAL = ['ACIMA DA BARRA','INFERIOR (Parte de baixo)','SUPERIOR (Parte de cima)','MEIO','ALTO'];
+const SIM_NAO = ['NÃO','SIM'];
+
+const LISTA_COLOCACAO = [
+  // INSTALAÇÃO DE CORTINAS E PERSIANAS
+  {cod:531822,desc:'PERSIANAS - VER, HOR 16, 25, 50, ROL, ROM, SHE, CAS, CEL, PLI. (TODOS OS MODELOS)',uni:'PÇ',cliente:76},
+  {cod:534025,desc:'PERSIANAS - MOTORIZADA',uni:'PÇ',cliente:96},
+  {cod:534026,desc:'CORTINA NO ILHÓS OU ARGOLA',uni:'M',cliente:38},
+  {cod:534027,desc:'CORTINA NO TUBO SUIÇO - 1 TUBO',uni:'M',cliente:45},
+  {cod:534028,desc:'CORTINA NO TUBO SUIÇO - 2 TUBOS (SUPORTE DUPLO)',uni:'M',cliente:52},
+  {cod:534029,desc:'CORTINA NO TRILHO SUIÇO CURVO (SE USAR MAIS TRILHOS COBRAR 2X, 3X, 4X...)',uni:'M',cliente:55},
+  {cod:534030,desc:'CORTINA NO TRILHO SUIÇO RETO (SE USAR MAIS TRILHOS COBRAR 2X, 3X, 4X...)',uni:'M',cliente:55},
+  {cod:534031,desc:'CORTINA NO TRILHO GLIDEA',uni:'M',cliente:142},
+  {cod:534032,desc:'CONFERIR MEDIDA DE PERSIANAS E CORTINAS',uni:'UNI',cliente:67},
+  {cod:534033,desc:'VESTIR CORTINA',uni:'UNI',cliente:20},
+  // VIAGEM
+  {cod:531823,desc:'LAGUNA (e Região)',uni:'UNI',cliente:187},
+  {cod:531824,desc:'GRAVATAL (e Região)',uni:'UNI',cliente:187},
+  {cod:531825,desc:'BRAÇO DO NORTE (e Região)',uni:'UNI',cliente:187},
+  {cod:531826,desc:'JAGUARUNA (e Região)',uni:'UNI',cliente:187},
+  {cod:531827,desc:'SANGÃO (e Região)',uni:'UNI',cliente:187},
+  {cod:531828,desc:'IMBITUBA (e Região)',uni:'UNI',cliente:220},
+  {cod:531829,desc:'GAROPABA (e Região)',uni:'UNI',cliente:264},
+  {cod:531830,desc:'CRICIÚMA (e Região)',uni:'UNI',cliente:264},
+  {cod:531831,desc:'ORLEANS (e Região)',uni:'UNI',cliente:264},
+  {cod:531832,desc:'FLORIANÓPOLIS (e Região)',uni:'UNI',cliente:500},
+  {cod:534034,desc:'DEMAIS CIDADES - CONSULTAR GERÊNCIA (DISTÂNCIA ACIMA DE 150KM)',uni:'UNI',cliente:0},
+];
+
+const LISTA_COSTURA = [
+  // CORTINA NO ILHÓS
+  {cod:531732,desc:'CORTINA NO ILHÓS COM ENTRETELA FORRADA (1 TECIDO)',uni:'M',costura:68,cliente:90},
+  {cod:531733,desc:'CORTINA NO ILHÓS COM FORRO E ENTRETELA FORRADA (2 TECIDOS)',uni:'M',costura:87,cliente:113},
+  {cod:531734,desc:'CORTINA NO ILHÓS COM FORRO TECIDO LISO (2 TECIDOS)',uni:'M',costura:54,cliente:68},
+  {cod:531735,desc:'CORTINA NO ILHÓS COM FORRO ORGANZA AMASSADA (2 TECIDOS)',uni:'M',costura:79,cliente:103},
+  {cod:531736,desc:'CORTINA NO ILHÓS SEM FORRO TECIDO LISO (1 TECIDO)',uni:'M',costura:48,cliente:63},
+  {cod:531737,desc:'CORTINA NO ILHÓS SEM FORRO ORGANZA AMASSADA (1 TECIDO)',uni:'M',costura:48,cliente:63},
+  {cod:531738,desc:'CORTINA NO ILHÓS COM FORRO E CHALE (3 TECIDOS)',uni:'M',costura:111,cliente:149},
+  {cod:531739,desc:'CORTINA NO ILHÓS COM FORRO, TOMAS E CHALE (3 TECIDOS)',uni:'M',costura:130,cliente:170},
+  {cod:531740,desc:'CORTINA NO ILHÓS COM FORRO E TOMAS (2 TECIDOS)',uni:'M',costura:89,cliente:116},
+  {cod:531741,desc:'CORTINA NO ILHÓS COM TOMAS (1 TECIDO)',uni:'M',costura:84,cliente:109},
+  {cod:539655,desc:'CORTINA NO ILHÓS ESCONDIDO NA PREGA MACHO E SEM TOMAS (1 TECIDO)',uni:'M',costura:57,cliente:70},
+  {cod:539656,desc:'CORTINA NO ILHÓS ESCONDIDO NA PREGA MACHO E TOMAS (1 TECIDO)',uni:'M',costura:91,cliente:120},
+  {cod:539657,desc:'CORTINA NO ILHÓS ESCONDIDO NA PREGA MACHO, FORRO E SEM TOMAS (2 TECIDOS)',uni:'M',costura:79,cliente:101},
+  {cod:539658,desc:'CORTINA NO ILHÓS ESCONDIDO NA PREGA MACHO, FORRO E TOMAS (2 TECIDOS)',uni:'M',costura:133,cliente:174},
+  // DESLIZANTE / ARGOLA
+  {cod:532989,desc:'CORTINA COM ENTRETELA DE 15cm (AUMENTAR EM CADA MODELO)',uni:'M',costura:25,cliente:36},
+  {cod:531750,desc:'CORTINA DESLIZANTE/ARGOLA FRANZIDA (1 TECIDO)',uni:'M',costura:37,cliente:45},
+  {cod:531752,desc:'CORTINA DESLIZANTE/ARGOLA FRANZIDA ORGANZA AMASSADA (1 TECIDO)',uni:'M',costura:41,cliente:55},
+  {cod:531753,desc:'CORTINA DESLIZANTE/ARGOLA FRANZIDA ORGANZA AMASSADA COM FORRO (2 TECIDOS)',uni:'M',costura:43,cliente:59},
+  {cod:531754,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA E SEM FORRO (1 TECIDO)',uni:'M',costura:41,cliente:55},
+  {cod:531755,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA E FORRO (2 TECIDOS)',uni:'M',costura:63,cliente:84},
+  {cod:531756,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA E TOMAS (1 TECIDO)',uni:'M',costura:82,cliente:107},
+  {cod:531757,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA, FORRO E TOMAS (2 TECIDOS)',uni:'M',costura:127,cliente:166},
+  {cod:531758,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA, FORRO, 6 TOMAS E 8 NERVURAS (2 TECIDOS)',uni:'M',costura:208,cliente:272},
+  {cod:531759,desc:'CORTINA DESLIZANTE EFEITO ILHÓS VIÉS E SEM FORRO (1 TECIDO)',uni:'M',costura:64,cliente:85},
+  {cod:531760,desc:'CORTINA DESLIZANTE EFEITO ILHÓS VIÉS, TOMAS E SEM FORRO (1 TECIDO)',uni:'M',costura:111,cliente:146},
+  {cod:531761,desc:'CORTINA DESLIZANTE EFEITO ILHÓS VIÉS E FORRO (2 TECIDOS)',uni:'M',costura:85,cliente:110},
+  {cod:531762,desc:'CORTINA DESLIZANTE EFEITO ILHÓS VIÉS, FORRO E TOMAS (2 TECIDOS)',uni:'M',costura:145,cliente:186},
+  {cod:531768,desc:'CORTINA DESLIZANTE EFEITO ILHÓS FITA BOTÃO - MOTOR GLYDEA UNILUX (1 TECIDO)',uni:'M',costura:80,cliente:104},
+  {cod:539659,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA E 5 A 6 TOMAS NA BAINHA (1 TECIDO)',uni:'M',costura:134,cliente:175},
+  {cod:539660,desc:'CORTINA DESLIZANTE/ARGOLA COM PREGA, FORRO E 5 A 6 TOMAS NA BAINHA (2 TECIDOS)',uni:'M',costura:181,cliente:236},
+  {cod:554553,desc:'CORTINA PREGA MACHO EM ALTURA (1 TECIDO)',uni:'M',costura:71,cliente:92},
+  {cod:554554,desc:'CORTINA PREGA MACHO EM ALTURA (2 TECIDOS)',uni:'M',costura:113,cliente:148},
+  {cod:554555,desc:'CORTINA EFEITO ILHÓS EM ALTURA (1 TECIDO)',uni:'M',costura:95,cliente:123},
+  {cod:554556,desc:'CORTINA EFEITO ILHÓS EM ALTURA (2 TECIDOS)',uni:'M',costura:132,cliente:172},
+  // OUTRAS CORTINAS
+  {cod:531767,desc:'CORTINA PROVADOR - PREÇO POR PEÇA',uni:'PÇ',costura:105,cliente:137},
+  {cod:531769,desc:'CORTINA AUSTRÍACA',uni:'M',costura:80,cliente:104},
+  {cod:531770,desc:'CORTINA AUSTRÍACA QUE RECOLHE',uni:'M',costura:98,cliente:130},
+  {cod:531771,desc:'CORTINA NA ALÇA',uni:'M',costura:39,cliente:51},
+  {cod:531772,desc:'BAINHA CORTINA RENDA',uni:'PÇ',costura:38,cliente:48},
+  {cod:531773,desc:'BAINHA CORTINA PRONTA',uni:'PÇ',costura:72,cliente:96},
+  {cod:531774,desc:'PAR DE BRAÇADEIRA',uni:'PAR',costura:22,cliente:30},
+  // ACENTO
+  {cod:531776,desc:'ACENTO COM ESPUMA',uni:'PÇ',costura:41,cliente:55},
+  {cod:531777,desc:'ACENTO COM CORDÃO',uni:'PÇ',costura:26,cliente:38},
+  {cod:531778,desc:'ACENTO COM DOIS CORDÕES E LAÇO',uni:'PÇ',costura:42,cliente:57},
+  {cod:531779,desc:'MANTA DE SOFÁ COM FRANJA',uni:'PÇ',costura:42,cliente:57},
+  // ALMOFADA
+  {cod:531780,desc:'ALMOFADA COM ZÍPER',uni:'PÇ',costura:26,cliente:38},
+  {cod:531781,desc:'ALMOFADA COM CORDONÊ',uni:'PÇ',costura:30,cliente:42},
+  {cod:531782,desc:'ALMOFADA COM BORDA OU NERVURA',uni:'PÇ',costura:33,cliente:43},
+  {cod:531783,desc:'ALMOFADA BORDADA',uni:'PÇ',costura:42,cliente:57},
+  {cod:531784,desc:'FUTON FEITO A MÃO (TAM. 0,50X0,50)',uni:'PÇ',costura:48,cliente:63},
+  {cod:531785,desc:'FUTON DE ESPUMA OU FIBRA 0,60 A 1,00 M',uni:'PÇ',costura:81,cliente:106},
+  {cod:531786,desc:'FUTON DE ESPUMA OU FIBRA 1,00 A 2,00 M',uni:'PÇ',costura:159,cliente:207},
+  {cod:531787,desc:'FUTON DE ESPUMA OU FIBRA COM MAIS DE 2,00 M',uni:'PÇ',costura:211,cliente:274},
+  {cod:531788,desc:'ENCHIMENTO DE ALMOFADA',uni:'PÇ',costura:17,cliente:21},
+  // TOALHA DE MESA
+  {cod:531789,desc:'TOALHA REDONDA',uni:'PÇ',costura:28,cliente:38},
+  {cod:531790,desc:'TOALHA COM BARRA',uni:'PÇ',costura:54,cliente:68},
+  {cod:531791,desc:'TOALHA COM VIÉS',uni:'PÇ',costura:28,cliente:38},
+  {cod:531792,desc:'TOALHA SÓ BAINHA',uni:'PÇ',costura:26,cliente:37},
+  {cod:531793,desc:'TOALHA BAINHA LARGA',uni:'PÇ',costura:48,cliente:63},
+  {cod:531794,desc:'TOALHA COM TOMAS',uni:'PÇ',costura:185,cliente:243},
+  // LENÇOL
+  {cod:531796,desc:'LENÇOL COM ELÁSTICO',uni:'PÇ',costura:30,cliente:40},
+  {cod:531797,desc:'MOSQUETEIRO',uni:'PÇ',costura:111,cliente:146},
+  {cod:531798,desc:'JOGO DE LENÇOL DE BEBE (3 PEÇAS)',uni:'JG',costura:63,cliente:84},
+  {cod:531799,desc:'PROTETOR (POR PEÇA)',uni:'PÇ',costura:42,cliente:57},
+  // COLCHA CASAL
+  {cod:531804,desc:'COLCHA CASAL COM TOMAS E NERVURAS',uni:'PÇ',costura:296,cliente:389},
+  {cod:531801,desc:'COLCHA CASAL LUVA',uni:'PÇ',costura:145,cliente:186},
+  {cod:533040,desc:'COLCHA (1,80 M LARGURA) COM TOMAS E NERVURAS',uni:'PÇ',costura:371,cliente:481},
+  {cod:531802,desc:'CAPA COLCHÃO CASAL',uni:'PÇ',costura:84,cliente:109},
+  {cod:531803,desc:'SAIA PARA CAMA',uni:'PÇ',costura:85,cliente:110},
+  {cod:531806,desc:'PESEIRA CAMA MATELADA',uni:'PÇ',costura:105,cliente:137},
+  {cod:531805,desc:'CABECEIRA DE CAMA CASAL (CADA) (CAMA DE CASAL VAI DUAS CABECEIRAS)',uni:'PÇ',costura:90,cliente:119},
+  // COLCHA SOLTEIRO
+  {cod:531808,desc:'COLCHA SOLTEIRO COM TOMAS E NERVURAS',uni:'PÇ',costura:278,cliente:362},
+  {cod:531809,desc:'COLCHA SOLTEIRO LUVA',uni:'PÇ',costura:125,cliente:162},
+  {cod:531810,desc:'CAPA COLCHÃO SOLTEIRO',uni:'PÇ',costura:54,cliente:68},
+  // TRAVESSEIRO
+  {cod:531811,desc:'TRAVESSEIRO E ROLO COM ZÍPER',uni:'PÇ',costura:61,cliente:80},
+  {cod:531812,desc:'TRAVESSEIRO COM NERVURA E ZÍPER OU SEDA',uni:'PÇ',costura:85,cliente:110},
+  {cod:531813,desc:'ENCHIMENTO DE TRAVESSEIRO',uni:'PÇ',costura:17,cliente:21},
+  {cod:531814,desc:'ENCOSTO DE BICAMA',uni:'PÇ',costura:149,cliente:193},
+  {cod:531815,desc:'FRONHA',uni:'PÇ',costura:21,cliente:28},
+  // BANDÔ
+  {cod:533041,desc:'BANDÔ CLÁSSICO (APENAS COSTURA)',uni:'M',costura:51,cliente:66},
+  {cod:531816,desc:'BANDÔ AUSTRÍACO (APENAS COSTURA)',uni:'M',costura:50,cliente:64},
+  {cod:531817,desc:'BANDÔ DE PREGA (APENAS COSTURA)',uni:'M',costura:33,cliente:41},
+  {cod:531818,desc:'BANDÔ DRAPEADO (APENAS COSTURA)',uni:'M',costura:54,cliente:68},
+  {cod:531819,desc:'BANDÔ DRAPIADO ATÉ O CHÃO (APENAS COSTURA)',uni:'M',costura:54,cliente:68},
+  {cod:531820,desc:'BANDÔ HORIZONTAL (APENAS COSTURA)',uni:'M',costura:54,cliente:68},
+  {cod:531821,desc:'OUTROS BANDÔS (APENAS COSTURA)',uni:'M',costura:67,cliente:89},
+  // AMERICANOS
+  {cod:531795,desc:'AMERICANO SIMPLES',uni:'PÇ',costura:21,cliente:28},
+  {cod:533042,desc:'AMERICANO COM BARRA',uni:'PÇ',costura:37,cliente:45},
+  {cod:533043,desc:'AMERICANO SÓ DUPLO',uni:'PÇ',costura:25,cliente:36},
+  {cod:533044,desc:'AMERICANO COM FIBRA',uni:'PÇ',costura:30,cliente:40},
+  // CORTINAS PARA LOJA
+  {cod:533045,desc:'CORTINA COM 3,50 METROS DE TECIDO',uni:'PÇ',costura:85,cliente:170},
+  {cod:533046,desc:'CORTINA COM 4 METROS DE TECIDO',uni:'PÇ',costura:96,cliente:192},
+  {cod:533047,desc:'CORTINA COM 5 METROS DE TECIDO',uni:'PÇ',costura:112,cliente:224},
+  {cod:533048,desc:'CORTINA COM 6 METROS DE TECIDO',uni:'PÇ',costura:132,cliente:264},
+  {cod:533049,desc:'CORTINA COM 7 METROS DE TECIDO',uni:'PÇ',costura:150,cliente:300},
+  {cod:533050,desc:'CORTINA COM 8 METROS DE TECIDO',uni:'PÇ',costura:191,cliente:382},
+];
+
+// ──────────────────────────────────────────────
+// ESTADO
+// ──────────────────────────────────────────────
+let pecas = JSON.parse(localStorage.getItem('cv2_pecas')||'[]');
+let historico = JSON.parse(localStorage.getItem('cv2_historico')||'[]');
+
+function fmt(v){return 'R$ '+Number(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function sel(opts,id){return `<select id="${id}">`+opts.map(o=>`<option>${o}</option>`).join('')+'</select>'}
+
+// ──────────────────────────────────────────────
+// TABS
+// ──────────────────────────────────────────────
+function showTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='orcamento') renderOrcamento();
+  if(id==='historico') renderHistorico();
+  if(id==='costura') renderCostura();
+  if(id==='impressao') renderImpressao();
+  if(id==='fichatec') renderFichaTec();
+  if(id==='clientes') renderClientes();
+  if(id==='pecas') pecas.forEach(p=>{const el=document.getElementById('p'+p.id+'_obs'); if(el) autoGrowObs(el);});
+}
+
+// ──────────────────────────────────────────────
+// PEÇAS
+// ──────────────────────────────────────────────
+function addPeca(){
+  const id = Date.now();
+  pecas.push({id, tipo:'CORTINA', local:'SALA', largura:'', altura:'',
+    engate:'ARGOLA', sustentacao:'VARÃO', forro:'SEM FORRO', prega:'FRANZIDA',
+    bainha:'15 CM', caimento:'1 CM DO CHÃO', folhas:'2 FOLHAS', abertura:'DIREITA',
+    montagem:'PAREDE', acima_janela:'20 CM', lateral_janela:'25 CM', tomas:'NÃO',
+    bandô:'NÃO', nervura:'NÃO', obs:'',
+    produtos:[{cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0},
+              {cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0},
+              {cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0}],
+    servicos:[{cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0}],
+    colocacoes:[{cod:'',desc:'',uni:'UNI',qtd:'',preco:'',desc_pct:0}],
+    sobra:'', viagem:'', colocacao_preco:''
+  });
+  savePecas();
+  renderPecas();
+}
+
+function savePecas(){localStorage.setItem('cv2_pecas',JSON.stringify(pecas))}
+
+function getPecaVal(id,field){
+  const el=document.getElementById(`p${id}_${field}`);
+  return el?el.value:'';
+}
+
+function savePecaFromDOM(pid){
+  if(_excluindo) return;
+  const p=pecas.find(x=>x.id===pid);
+  if(!p) return;
+  ['tipo','local','largura','altura','engate','sustentacao','forro','prega','bainha',
+   'caimento','folhas','abertura','montagem','acima_janela','lateral_janela','tomas',
+   'bandô','nervura','obs','sobra','viagem','colocacao_preco'].forEach(f=>{
+    const el=document.getElementById(`p${pid}_${f}`);
+    if(el) p[f]=el.value;
+  });
+  // produtos
+  p.produtos=[];
+  let i=0;
+  while(document.getElementById(`p${pid}_pr${i}_cod`)){
+    p.produtos.push({
+      cod:document.getElementById(`p${pid}_pr${i}_cod`).value,
+      desc:document.getElementById(`p${pid}_pr${i}_desc`).value,
+      uni:document.getElementById(`p${pid}_pr${i}_uni`).value,
+      qtd:parseQtd(document.getElementById(`p${pid}_pr${i}_qtd`).value),
+      preco:parseMoeda(document.getElementById(`p${pid}_pr${i}_preco`).value),
+      desc_pct:parseFloat((document.getElementById(`p${pid}_pr${i}_descpct`).value||'0').replace('%','').replace(',','.'))||0,
+    });i++;
+  }
+  p.servicos=[];
+  i=0;
+  while(document.getElementById(`p${pid}_sv${i}_cod`)){
+    p.servicos.push({
+      cod:document.getElementById(`p${pid}_sv${i}_cod`).value,
+      desc:document.getElementById(`p${pid}_sv${i}_desc`).value,
+      uni:document.getElementById(`p${pid}_sv${i}_uni`).value,
+      qtd:parseQtd(document.getElementById(`p${pid}_sv${i}_qtd`).value),
+      preco:parseMoeda(document.getElementById(`p${pid}_sv${i}_preco`).value),
+      desc_pct:document.getElementById(`p${pid}_sv${i}_descpct`).value,
+    });i++;
+  }
+  p.colocacoes=[];
+  i=0;
+  while(document.getElementById(`p${pid}_cl${i}_cod`)){
+    p.colocacoes.push({
+      cod:document.getElementById(`p${pid}_cl${i}_cod`).value,
+      desc:document.getElementById(`p${pid}_cl${i}_desc`).value,
+      uni:document.getElementById(`p${pid}_cl${i}_uni`).value,
+      qtd:parseQtd(document.getElementById(`p${pid}_cl${i}_qtd`).value),
+      preco:parseMoeda(document.getElementById(`p${pid}_cl${i}_preco`).value),
+      desc_pct:document.getElementById(`p${pid}_cl${i}_descpct`).value,
+    });i++;
+  }
+  savePecas();
+  calcPeca(pid);
+}
+
+function calcPeca(pid){
+  const p=pecas.find(x=>x.id===pid);
+  if(!p) return;
+  let totProd=0;
+  p.produtos.forEach(pr=>{
+    const qtd=parseFloat(pr.qtd)||0;
+    const preco=parseFloat(pr.preco)||0;
+    const desc=parseFloat(pr.desc_pct)||0;
+    const sub=qtd*preco;
+    const descVal=sub*(desc/100);
+    pr._sub=sub-descVal;
+    totProd+=pr._sub;
+  });
+  let totServ=0;
+  p.servicos.forEach(sv=>{
+    const qtd=parseFloat(sv.qtd)||0;
+    const preco=parseFloat(sv.preco)||0;
+    const desc=parseFloat(sv.desc_pct)||0;
+    const sub=qtd*preco;
+    const descVal=sub*(desc/100);
+    sv._sub=sub-descVal;
+    totServ+=sv._sub;
+  });
+  let totCol=0;
+  (p.colocacoes||[]).forEach(cl=>{
+    const qtd=parseFloat(cl.qtd)||0;
+    const preco=parseFloat(cl.preco)||0;
+    const desc=parseFloat(cl.desc_pct)||0;
+    const sub=qtd*preco;
+    const descVal=sub*(desc/100);
+    cl._sub=sub-descVal;
+    totCol+=cl._sub;
+  });
+  const sobra=parseFloat(p.sobra)||0;
+  const viagem=parseFloat(p.viagem)||0;
+  const colocacao=parseFloat(p.colocacao_preco)||0;
+  p._total=totProd+totServ+totCol+sobra+viagem+colocacao;
+  savePecas();
+  const el=document.getElementById(`p${pid}_total`);
+  if(el) el.textContent=fmt(p._total);
+}
+
+function addProdutoPeca(pid){
+  savePecaFromDOM(pid);
+  const p=pecas.find(x=>x.id===pid);
+  p.produtos.push({cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0});
+  savePecas();
+  renderPecas();
+}
+
+function addServicoPeca(pid){
+  savePecaFromDOM(pid);
+  const p=pecas.find(x=>x.id===pid);
+  p.servicos.push({cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0});
+  savePecas();
+  renderPecas();
+}
+
+let _excluindo = false;
+
+function removePeca(pid){
+  if(!confirm('Tem certeza que gostaria de excluir esta peça?')) return;
+  _excluindo = true;
+  pecas = pecas.filter(x => x.id !== pid);
+  savePecas();
+  renderPecas();
+  _excluindo = false;
+}
+
+function renderColocacaoRow(pid,cl,i){
+  const prefix=`p${pid}_cl${i}`;
+  const opts=LISTA_COLOCACAO.map(c=>{
+    const codFmt=String(c.cod).replace(/(\d{3})(\d{3})/,'$1.$2');
+    const sel=(cl.cod&&cl.cod==c.cod)?' selected':'';
+    return `<option value="${c.cod}"${sel}>${codFmt} — ${c.desc.substring(0,50)}${c.desc.length>50?'...':''}</option>`;
+  }).join('');
+  return `<tr>
+    <td style="min-width:280px">
+      <select id="${prefix}_lista" onchange="selecionarColocacao(${pid},${i})" style="font-size:12px;width:100%">
+        <option value="">— Selecionar da lista —</option>
+        ${opts}
+      </select>
+    </td>
+    <input type="hidden" id="${prefix}_cod" value="${cl.cod||''}">
+    <input type="hidden" id="${prefix}_desc" value="${cl.desc||''}">
+    <td><select id="${prefix}_uni" onchange="savePecaFromDOM(${pid})" style="width:58px;padding:7px 2px;text-align:center"><option${cl.uni==='M'?' selected':''}>M</option><option${cl.uni==='PÇ'?' selected':''}>PÇ</option><option${cl.uni==='UNI'?' selected':''}>UNI</option><option${cl.uni==='PAR'?' selected':''}>PAR</option></select></td>
+    <td><input id="${prefix}_qtd" type="text" value="${cl.qtd?formatarQtd(cl.qtd):''}" style="width:70px" placeholder="0,00" oninput="mascaraQtd(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td><input id="${prefix}_preco" type="text" value="${cl.preco?formatarMoeda(cl.preco):''}" style="width:110px" placeholder="R$ 0,00" oninput="mascaraMoeda(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td><input id="${prefix}_descpct" type="number" min="0" max="100" value="${cl.desc_pct||0}" style="width:55px" placeholder="%" oninput="calcSubtotalRow('${prefix}',${pid})"></td>
+    <td style="font-weight:600;text-align:right;white-space:nowrap" id="${prefix}_sub">${cl._sub!=null&&cl._sub>0?fmt(cl._sub):'—'}</td>
+    <td><button onmousedown="event.preventDefault()" onclick="removerRow(${pid},${i},'cl')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
+  </tr>`;
+}
+
+function selecionarColocacao(pid,i){
+  const prefix=`p${pid}_cl${i}`;
+  const codSel=document.getElementById(`${prefix}_lista`).value;
+  if(!codSel) return;
+  const item=LISTA_COLOCACAO.find(c=>c.cod==codSel);
+  if(!item) return;
+  document.getElementById(`${prefix}_cod`).value=item.cod;
+  document.getElementById(`${prefix}_desc`).value=item.desc;
+  document.getElementById(`${prefix}_uni`).value=item.uni;
+  document.getElementById(`${prefix}_preco`).value=item.cliente?formatarMoeda(item.cliente):'';
+  savePecaFromDOM(pid);
+}
+
+function addColocacaoPeca(pid){
+  savePecaFromDOM(pid);
+  const p=pecas.find(x=>x.id===pid);
+  if(!p.colocacoes) p.colocacoes=[];
+  p.colocacoes.push({cod:'',desc:'',uni:'UNI',qtd:'',preco:'',desc_pct:0});
+  savePecas();
+  renderPecas();
+}
+
+function renderServicoRow(pid,sv,i){
+  const prefix=`p${pid}_sv${i}`;
+  const opts=LISTA_COSTURA.map(c=>{
+    const codFmt=String(c.cod).replace(/(\d{3})(\d{3})/,'$1.$2');
+    const sel=(sv.cod&&sv.cod==c.cod)?' selected':'';
+    return `<option value="${c.cod}"${sel}>${codFmt} — ${c.desc.substring(0,50)}${c.desc.length>50?'...':''}</option>`;
+  }).join('');
+  return `<tr>
+    <td style="min-width:280px">
+      <select id="${prefix}_lista" onchange="selecionarServico(${pid},${i})" style="font-size:12px;width:100%">
+        <option value="">— Selecionar da lista —</option>
+        ${opts}
+      </select>
+    </td>
+    <input type="hidden" id="${prefix}_cod" value="${sv.cod||''}">
+    <input type="hidden" id="${prefix}_desc" value="${sv.desc||''}">
+    <td><select id="${prefix}_uni" onchange="savePecaFromDOM(${pid})" style="width:52px;padding:7px 2px;text-align:center"><option${sv.uni==='M'?' selected':''}>M</option><option${sv.uni==='PÇ'?' selected':''}>PÇ</option><option${sv.uni==='PAR'?' selected':''}>PAR</option><option${sv.uni==='JG'?' selected':''}>JG</option></select></td>
+    <td><input id="${prefix}_qtd" type="text" value="${sv.qtd?formatarQtd(sv.qtd):''}" style="width:70px" placeholder="0,00" oninput="mascaraQtd(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td><input id="${prefix}_preco" type="text" value="${sv.preco?formatarMoeda(sv.preco):''}" style="width:110px" placeholder="R$ 0,00" oninput="mascaraMoeda(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td><input id="${prefix}_descpct" type="number" min="0" max="100" value="${sv.desc_pct||0}" style="width:55px" placeholder="%" oninput="calcSubtotalRow('${prefix}',${pid})"></td>
+    <td style="font-weight:600;text-align:right;white-space:nowrap" id="${prefix}_sub">${sv._sub!=null&&sv._sub>0?fmt(sv._sub):'—'}</td>
+    <td><button onmousedown="event.preventDefault()" onclick="removerRow(${pid},${i},'sv')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
+  </tr>`;
+}
+
+function selecionarServico(pid,i){
+  const prefix=`p${pid}_sv${i}`;
+  const codSel=document.getElementById(`${prefix}_lista`).value;
+  if(!codSel) return;
+  const item=LISTA_COSTURA.find(c=>c.cod==codSel);
+  if(!item) return;
+  document.getElementById(`${prefix}_cod`).value=item.cod;
+  document.getElementById(`${prefix}_desc`).value=item.desc;
+  document.getElementById(`${prefix}_uni`).value=item.uni;
+  document.getElementById(`${prefix}_preco`).value=formatarMoeda(item.cliente);
+  savePecaFromDOM(pid);
+}
+
+function renderProdutoRow(pid,pr,i,tipo){
+  const prefix=`p${pid}_${tipo}${i}`;
+  return `<tr>
+    <td><input id="${prefix}_cod" value="${pr.cod||''}" style="width:80px" placeholder="Cód" oninput="mascaraCodProd(this);savePecaFromDOM(${pid})"></td>
+    <td style="min-width:320px"><input id="${prefix}_desc" value="${pr.desc||''}" placeholder="Descrição do produto/serviço" oninput="this.value=this.value.toUpperCase();savePecaFromDOM(${pid})" style="text-transform:uppercase"></td>
+    <td><select id="${prefix}_uni" onchange="savePecaFromDOM(${pid})" style="width:52px;padding:7px 2px;text-align:center"><option${pr.uni==='M'?' selected':''}>M</option><option${pr.uni==='PÇ'?' selected':''}>PÇ</option><option${pr.uni==='PAR'?' selected':''}>PAR</option><option${pr.uni==='JG'?' selected':''}>JG</option></select></td>
+    <td><input id="${prefix}_qtd" type="text" value="${pr.qtd?formatarQtd(pr.qtd):''}" style="width:85px" placeholder="0,00" oninput="mascaraQtd(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td><input id="${prefix}_preco" type="text" value="${pr.preco?formatarMoeda(pr.preco):''}" style="width:110px" placeholder="R$ 0,00" oninput="mascaraMoeda(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td><input id="${prefix}_descpct" type="text" value="${pr.desc_pct?(pr.desc_pct+'%'):''}" style="width:72px" placeholder="0%" oninput="mascaraPct(this);calcSubtotalRow('${prefix}',${pid})"></td>
+    <td style="font-weight:600;text-align:right;white-space:nowrap" id="${prefix}_sub">${pr._sub!=null&&pr._sub>0?fmt(pr._sub):'—'}</td>
+    <td><button onclick="removerRow(${pid},${i},'pr')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
+  </tr>`;
+}
+
+function removerRow(pid, idx, tipo){
+  _excluindo=true;
+  savePecaFromDOM(pid);
+  _excluindo=false;
+  const p=pecas.find(x=>x.id===pid);
+  if(!p) return;
+  if(tipo==='pr') p.produtos.splice(idx,1);
+  else if(tipo==='sv') p.servicos.splice(idx,1);
+  else if(tipo==='cl'){ if(!p.colocacoes) p.colocacoes=[]; p.colocacoes.splice(idx,1); }
+  savePecas();
+  renderPecas();
+}
+
+function removerProduto(pid,i){ removerRow(pid,i,'pr'); }
+
+function renderPecas(){
+  const el=document.getElementById('lista-pecas');
+  if(!pecas.length){el.innerHTML='<div class="card"><div class="empty">Clique em "Nova Peça" para começar.</div></div>';return}
+  el.innerHTML=pecas.map((p,idx)=>`
+  <div class="peca-card" id="pcard${p.id}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="section-badge">FICHA TÉCNICA</span>
+        <span style="font-size:13px;font-weight:700;color:#2c2c2a">Peça ${idx+1}</span>
+      </div>
+      <button class="btn btn-red" onclick="_excluindo=true;removePeca(${p.id})" style="font-size:12px;padding:5px 12px">🗑️ Excluir Peça</button>
+    </div>
+
+    <div class="grid4" style="margin-bottom:10px">
+      <div class="field"><label>Tipo de Costura</label><select id="p${p.id}_tipo" onchange="savePecaFromDOM(${p.id})">${TIPOS_COSTURA.map(o=>`<option${o===p.tipo?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Local do Ambiente</label><select id="p${p.id}_local" onchange="savePecaFromDOM(${p.id})">${LOCAIS.map(o=>`<option${o===p.local?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Largura (m)</label><input id="p${p.id}_largura" type="number" step="0.01" value="${p.largura}" placeholder="ex: 2,00" oninput="savePecaFromDOM(${p.id})"></div>
+      <div class="field"><label>Altura (m)</label><input id="p${p.id}_altura" type="number" step="0.01" value="${p.altura}" placeholder="ex: 1,40" oninput="savePecaFromDOM(${p.id})"></div>
+    </div>
+
+    <div class="grid3" style="margin-bottom:10px">
+      <div class="field"><label>Engate (do tecido)</label><select id="p${p.id}_engate" onchange="savePecaFromDOM(${p.id})">${ENGATES.map(o=>`<option${o===p.engate?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Sustentação</label><select id="p${p.id}_sustentacao" onchange="savePecaFromDOM(${p.id})">${SUSTENTACOES.map(o=>`<option${o===p.sustentacao?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Forro</label><select id="p${p.id}_forro" onchange="savePecaFromDOM(${p.id})">${FORROS.map(o=>`<option${o===p.forro?' selected':''}>${o}</option>`).join('')}</select></div>
+    </div>
+
+    <div style="background:#f9f8f5;border:1px solid #e8e7e0;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+      <div style="display:flex;flex-direction:column;min-width:100px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Prega</label>
+        <select id="p${p.id}_prega" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${PREGAS.map(o=>`<option${o===p.prega?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Bainha</label>
+        <select id="p${p.id}_bainha" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${BAINHA_OPTS.map(o=>`<option${o===p.bainha?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:110px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Caimento</label>
+        <select id="p${p.id}_caimento" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${CAIMENTO_OPTS.map(o=>`<option${o===p.caimento?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Folhas</label>
+        <select id="p${p.id}_folhas" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${FOLHAS_OPTS.map(o=>`<option${o===p.folhas?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Abertura</label>
+        <select id="p${p.id}_abertura" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${ABERTURA_OPTS.map(o=>`<option${o===p.abertura?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:90px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Montagem</label>
+        <select id="p${p.id}_montagem" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${MONTAGEM_OPTS.map(o=>`<option${o===p.montagem?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Acima Jan.</label>
+        <select id="p${p.id}_acima_janela" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${JANELA_OPTS.map(o=>`<option${o===p.acima_janela?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Lateral Jan.</label>
+        <select id="p${p.id}_lateral_janela" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${JANELA_OPTS.map(o=>`<option${o===p.lateral_janela?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:70px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Tomas</label>
+        <select id="p${p.id}_tomas" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${SIM_NAO.map(o=>`<option${o===p.tomas?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:70px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Bandô</label>
+        <select id="p${p.id}_bandô" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${SIM_NAO.map(o=>`<option${o===p.bandô?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;min-width:70px;flex:1">
+        <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Nervura</label>
+        <select id="p${p.id}_nervura" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${SIM_NAO.map(o=>`<option${o===p.nervura?' selected':''}>${o}</option>`).join('')}</select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:#888;font-weight:600;display:block;margin-bottom:4px">Observações</label>
+      <textarea id="p${p.id}_obs" rows="5" placeholder="Observações sobre a peça..." oninput="autoGrowObs(this);savePecaFromDOM(${p.id})" style="font-size:13px;padding:8px 10px;resize:none;overflow-y:hidden;line-height:1.5;font-family:inherit">${p.obs||''}</textarea>
+    </div>
+
+    <div class="section-badge">PRODUTOS — COSTURA</div>
+    <div style="overflow-x:auto;margin-bottom:8px">
+    <table class="lista" style="min-width:600px">
+      <thead><tr><th>Cód</th><th>Descrição</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th>Subtotal</th><th></th></tr></thead>
+      <tbody>${p.produtos.map((pr,i)=>renderProdutoRow(p.id,pr,i,'pr')).join('')}</tbody>
+    </table>
+    </div>
+    <button class="btn btn-outline" style="font-size:12px;padding:5px 12px" onclick="addProdutoPeca(${p.id})">+ Produto</button>
+
+    <div style="margin-top:14px"><div class="section-badge">SERVIÇO — COSTURA</div></div>
+    <div style="overflow-x:auto;margin:8px 0">
+    <table class="lista" style="min-width:700px">
+      <thead><tr><th>Serviço da Lista</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th>Subtotal</th><th></th></tr></thead>
+      <tbody>${p.servicos.map((sv,i)=>renderServicoRow(p.id,sv,i)).join('')}</tbody>
+    </table>
+    </div>
+    <button class="btn btn-outline" style="font-size:12px;padding:5px 12px" onclick="addServicoPeca(${p.id})">+ Serviço</button>
+
+    <div style="margin-top:14px"><div class="section-badge" style="background:#185fa5">SERVIÇO — COLOCAÇÃO</div></div>
+    <div style="overflow-x:auto;margin:8px 0">
+    <table class="lista" style="min-width:700px">
+      <thead><tr><th>Serviço da Lista</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th>Subtotal</th><th></th></tr></thead>
+      <tbody>${(p.colocacoes||[]).map((cl,i)=>renderColocacaoRow(p.id,cl,i)).join('')}</tbody>
+    </table>
+    </div>
+    <button class="btn btn-outline" style="font-size:12px;padding:5px 12px" onclick="addColocacaoPeca(${p.id})">+ Colocação</button>
+
+    <div class="grid3" style="margin-top:14px">
+      <div class="field"><label>Valor Sobra (R$)</label><input id="p${p.id}_sobra" type="number" step="0.01" value="${p.sobra||''}" placeholder="0,00" oninput="savePecaFromDOM(${p.id})"></div>
+      <div class="field"><label>Viagem (R$)</label><input id="p${p.id}_viagem" type="number" step="0.01" value="${p.viagem||''}" placeholder="0,00" oninput="savePecaFromDOM(${p.id})"></div>
+      <div class="field"><label>Colocação (R$)</label><input id="p${p.id}_colocacao_preco" type="number" step="0.01" value="${p.colocacao_preco||''}" placeholder="0,00" oninput="savePecaFromDOM(${p.id})"></div>
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="section-badge">ESBOÇO / DESENHO DA CORTINA</div>
+      <div style="margin-top:8px;background:#fafafa;border:1px dashed #ccc;border-radius:8px;padding:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <label style="font-size:12px;color:#666;margin:0">Cor:</label>
+          <input type="color" id="draw_color_${p.id}" value="#2c2c2a" style="width:32px;height:28px;padding:2px;border:1px solid #ddd;border-radius:4px;cursor:pointer">
+          <label style="font-size:12px;color:#666;margin:0">Espessura:</label>
+          <select id="draw_size_${p.id}" style="font-size:12px;padding:3px 6px;width:auto">
+            <option value="2">Fina</option>
+            <option value="4" selected>Média</option>
+            <option value="8">Grossa</option>
+            <option value="16">Muito grossa</option>
+          </select>
+          <button onclick="limparCanvas('canvas_${p.id}')" class="btn btn-outline" style="font-size:11px;padding:4px 10px">🗑️ Limpar</button>
+          <span style="font-size:11px;color:#aaa;margin-left:auto">Desenhe com o mouse ou toque na tela</span>
+        </div>
+        <canvas id="canvas_${p.id}" width="800" height="260"
+          style="width:100%;height:260px;border:1px solid #e0dfd8;border-radius:6px;background:#fff;cursor:crosshair;touch-action:none;display:block">
+        </canvas>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:8px;padding-top:10px;border-top:1px solid #eee">
+      <span style="font-size:13px;color:#666">Total da Peça:</span>
+      <span style="font-size:18px;font-weight:700;color:#0f6e56" id="p${p.id}_total">${p._total!=null?fmt(p._total):'—'}</span>
+    </div>
+  </div>`).join('');
+  pecas.forEach(p=>{calcPeca(p.id);initCanvas(p.id);const obsEl=document.getElementById(`p${p.id}_obs`);if(obsEl) autoGrowObs(obsEl);});
+}
+
+// ──────────────────────────────────────────────
+// CANVAS DESENHO
+// ──────────────────────────────────────────────
+function autoGrowObs(el){
+  const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 19.5;
+  const minHeight = lineHeight*5 + 18;
+  const maxHeight = lineHeight*10 + 18;
+  el.style.height = 'auto';
+  const needed = el.scrollHeight || minHeight; // scrollHeight é 0 se a aba estiver oculta
+  const target = Math.max(needed, minHeight);
+  el.style.height = Math.min(target, maxHeight) + 'px';
+  el.style.overflowY = target > maxHeight ? 'auto' : 'hidden';
+}
+
+function initCanvas(pid){
+  const canvas=document.getElementById(`canvas_${pid}`);
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  let drawing=false, lastX=0, lastY=0;
+
+  function getPos(e){
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width;
+    const scaleY=canvas.height/rect.height;
+    const src=e.touches?e.touches[0]:e;
+    return {x:(src.clientX-rect.left)*scaleX, y:(src.clientY-rect.top)*scaleY};
+  }
+
+  function getColor(){return document.getElementById(`draw_color_${pid}`).value}
+  function getSize(){return parseInt(document.getElementById(`draw_size_${pid}`).value)}
+
+  function start(e){e.preventDefault();drawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;}
+  function draw(e){
+    e.preventDefault();
+    if(!drawing) return;
+    const p=getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX,lastY);
+    ctx.lineTo(p.x,p.y);
+    ctx.strokeStyle=getColor();
+    ctx.lineWidth=getSize();
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+    ctx.stroke();
+    lastX=p.x;lastY=p.y;
+  }
+  function stop(e){e.preventDefault();drawing=false;}
+
+  canvas.addEventListener('mousedown',start);
+  canvas.addEventListener('mousemove',draw);
+  canvas.addEventListener('mouseup',stop);
+  canvas.addEventListener('mouseleave',stop);
+  canvas.addEventListener('touchstart',start,{passive:false});
+  canvas.addEventListener('touchmove',draw,{passive:false});
+  canvas.addEventListener('touchend',stop,{passive:false});
+}
+
+function limparCanvas(id){
+  const canvas=document.getElementById(id);
+  if(!canvas) return;
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+}
+
+// ──────────────────────────────────────────────
+// ORÇAMENTO
+// ──────────────────────────────────────────────
+function recalcOrc(){renderOrcamento()}
+
+function renderOrcamento(){
+  const nome=document.getElementById('cli-nome').value||'—';
+  const tel=document.getElementById('cli-cel').value||document.getElementById('cli-tel-res').value||'—';
+  const end=document.getElementById('cli-end').value;
+  const cidade=document.getElementById('cli-cidade').value;
+  document.getElementById('orc-cli-resumo').innerHTML=`
+    <b>${nome}</b><br>
+    ${tel}<br>
+    ${end?end+', '+document.getElementById('cli-num').value:'Endereço não informado'}<br>
+    ${document.getElementById('cli-bairro').value||''} — ${cidade}
+  `;
+
+  const el=document.getElementById('orc-itens');
+  const elProd=document.getElementById('orc-produtos-lista');
+  if(!pecas.length){
+    el.innerHTML='<div class="empty">Adicione peças na aba "Fichas de Peças".</div>';
+    elProd.innerHTML='<div class="empty">Sem produtos cadastrados.</div>';
+    document.getElementById('orc-total').textContent='R$ 0,00';
+    return;
+  }
+
+  let totCostura=0,totSobra=0,totColocacao=0,totViagem=0,totGeral=0;
+  let prodHtml='';
+
+  pecas.forEach((p,i)=>{
+    let subtotProd=0,subtotServ=0;
+    p.produtos.forEach(pr=>{subtotProd+=(pr._sub||0)});
+    p.servicos.forEach(sv=>{subtotServ+=(sv._sub||0)});
+    const sobra=parseFloat(p.sobra)||0;
+    const viagem=parseFloat(p.viagem)||0;
+    const col=parseFloat(p.colocacao_preco)||0;
+    totCostura+=subtotServ;
+    totSobra+=sobra;
+    totColocacao+=col;
+    totViagem+=viagem;
+    totGeral+=(p._total||0);
+
+    prodHtml+=`<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f0eeea">
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px">Peça ${i+1} — ${p.local} (${p.tipo})</div>
+      <div style="font-size:12px;color:#888">${p.largura||'—'} × ${p.altura||'—'} m · ${p.engate} · ${p.sustentacao} · ${p.forro}</div>
+      <div style="font-size:13px;font-weight:600;color:#0f6e56;margin-top:4px">${fmt(p._total||0)}</div>
+    </div>`;
+  });
+
+  const moVal=parseFloat(document.getElementById('orc-mo').value)||0;
+  totGeral+=moVal;
+  totColocacao+=moVal;
+
+  el.innerHTML=pecas.map((p,i)=>`
+    <div class="row">
+      <div><div style="font-weight:600">Peça ${i+1} — ${p.local}</div><div style="font-size:11px;color:#aaa">${p.tipo} · ${p.largura||'—'}×${p.altura||'—'}m</div></div>
+      <span style="font-weight:600">${fmt(p._total||0)}</span>
+    </div>`).join('');
+
+  document.getElementById('sum-costura').textContent=fmt(totCostura);
+  document.getElementById('sum-sobra').textContent=fmt(totSobra);
+  document.getElementById('sum-colocacao').textContent=fmt(totColocacao);
+  document.getElementById('sum-viagem').textContent=fmt(totViagem);
+  document.getElementById('orc-total').textContent=fmt(totGeral);
+  elProd.innerHTML=prodHtml||'<div class="empty">Sem produtos.</div>';
+}
+
+function salvarOrcamento(){
+  if(!pecas.length){alert('Adicione pelo menos uma peça.');return}
+  const nome=document.getElementById('cli-nome').value||'Cliente não identificado';
+  let total=0; pecas.forEach(p=>total+=(p._total||0));
+  const orc={
+    id:Date.now(),
+    data:new Date().toLocaleDateString('pt-BR'),
+    nome, tel:document.getElementById('cli-cel').value,
+    cidade:document.getElementById('cli-cidade').value,
+    pecas:JSON.parse(JSON.stringify(pecas)), total,
+    pgto:document.getElementById('orc-pgto').value,
+    entrada:document.getElementById('orc-entrada').value,
+  };
+  historico.unshift(orc);
+  localStorage.setItem('cv2_historico',JSON.stringify(historico));
+  alert(`Orçamento de ${nome} salvo! Total: ${fmt(total)}`);
+  renderHistorico();
+}
+
+function limparOrcamento(){
+  if(!confirm('Deseja limpar as peças do orçamento atual?')) return;
+  pecas=[];savePecas();renderPecas();renderOrcamento();
+}
+
+// ──────────────────────────────────────────────
+// HISTÓRICO
+// ──────────────────────────────────────────────
+// renderHistorico e limparHistorico → substituídos pela versão Firebase no final do arquivo
+function limparHistorico(){ alert('O histórico agora fica na aba 👥 Clientes, salvo na nuvem.'); }
+
+// ──────────────────────────────────────────────
+// IMPRESSÃO
+// ──────────────────────────────────────────────
+function g(id){return (document.getElementById(id)||{}).value||''}
+function renderImpressao(){
+  const nome=g('cli-nome'), cpf=g('cli-cpf'), rg=g('cli-rg');
+  const cel=g('cli-cel'), telRes=g('cli-tel-res'), telCom=g('cli-tel-com');
+  const email=g('cli-email'), codCli=g('cod-cli'), codVend=g('cod-vend');
+  const end=g('cli-end'), num=g('cli-num'), comp=g('cli-comp');
+  const bairro=g('cli-bairro'), edif=g('cli-edif');
+  const cidade=g('cli-cidade'), estado=g('cli-estado'), cep=g('cli-cep');
+  const colData=g('col-data'), colHora=g('col-hora'), colVend=g('col-vend');
+  const colEnd=g('col-end'), colNum=g('col-num'), colComp=g('col-comp');
+  const colApto=g('col-apto'), colBairro=g('col-bairro'), colEdif=g('col-edif');
+  const colCidade=g('col-cidade'), colCep=g('col-cep'), colProx=g('col-prox');
+  const colCel=g('col-cel'), colTel=g('col-tel');
+  const resp=g('resp-nome'), respTel=g('resp-tel'), porteiro=g('porteiro'), horEdif=g('horario-entrega');
+  const qtdPecas=g('qtd-pecas'), pgtoForma=g('pgto-forma'), pgtoEnt=g('pgto-entrada'), obs=g('cli-obs');
+  const hoje=new Date().toLocaleDateString('pt-BR');
+
+  let totalGeral=0; pecas.forEach(p=>totalGeral+=(p._total||0));
+
+  const linha=(label,val)=>val?`<tr><td style="color:#666;width:160px;padding:4px 8px;font-size:12px;vertical-align:top">${label}</td><td style="padding:4px 8px;font-size:13px;font-weight:500">${val}</td></tr>`:'';
+
+  // PAGE 1: Cabeçalho + Cliente + Entrega
+  const page1=`
+  <div class="print-page" style="font-family:'Segoe UI',Arial,sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #2c2c2a;padding-bottom:12px;margin-bottom:16px">
+      <div>
+        <div style="font-size:20px;font-weight:700;color:#2c2c2a">🪟 NANDI CORTINAS & DECOR — ORÇAMENTO DE COSTURA</div>
+        <div style="font-size:12px;color:#666;margin-top:2px">Rua dos Ferroviários, 411 — Oficinas · Tubarão/SC · (48) 3622-0008</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666">
+        <div>Data: <b>${hoje}</b></div>
+        ${codVend?`<div>Cód. Vendedora: <b>${codVend}</b></div>`:''}
+        ${codCli?`<div>Cód. Cliente: <b>${codCli}</b></div>`:''}
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">DADOS DO CLIENTE</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Nome',nome)}
+          ${linha('CPF/CNPJ',cpf)}
+          ${linha('RG',rg)}
+          ${linha('Celular',cel)}
+          ${linha('Tel. Residencial',telRes)}
+          ${linha('Tel. Comercial',telCom)}
+          ${linha('E-mail',email)}
+          ${linha('Endereço',end+(num?' nº '+num:''))}
+          ${linha('Complemento',comp)}
+          ${linha('Bairro',bairro)}
+          ${linha('Edifício',edif)}
+          ${linha('Cidade/Estado',cidade+(estado?' — '+estado:''))}
+          ${linha('CEP',cep)}
+          ${linha('Observações',obs)}
+        </table>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">DADOS DE ENTREGA / COLOCAÇÃO</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Data de Colocação',colData?new Date(colData+'T00:00').toLocaleDateString('pt-BR'):'')}
+          ${linha('Hora',colHora)}
+          ${linha('Vendedora',colVend)}
+          ${linha('Endereço Entrega',colEnd+(colNum?' nº '+colNum:''))}
+          ${linha('Complemento',colComp)}
+          ${linha('Apto',colApto)}
+          ${linha('Bairro',colBairro)}
+          ${linha('Edifício',colEdif)}
+          ${linha('Cidade',colCidade+(colCep?' — CEP '+colCep:''))}
+          ${linha('Proximidade',colProx)}
+          ${linha('Cel. Cliente',colCel)}
+          ${linha('Tel. Cliente',colTel)}
+          ${linha('Responsável',resp)}
+          ${linha('Tel. Responsável',respTel)}
+          ${linha('Porteiro',porteiro)}
+          ${linha('Horário Entrega',horEdif)}
+          ${linha('Qtd. de Peças',qtdPecas)}
+        </table>
+      </div>
+    </div>
+
+    <div style="background:#f5f4f0;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;color:#666">Forma de pagamento: <b>${pgtoForma||'—'}</b>${pgtoEnt?' · Entrada: <b>R$ '+pgtoEnt+'</b>':''}</div>
+      <div style="font-size:16px;font-weight:700;color:#0f6e56">TOTAL: ${fmt(totalGeral)}</div>
+    </div>
+    <div style="font-size:10px;color:#aaa;margin-top:8px;text-align:right">* Orçamento válido por 15 dias.</div>
+  </div>`;
+
+  // PAGE 2+: Fichas das peças
+  const pagesPecas = pecas.map((p,idx)=>`
+  <div class="print-page" style="font-family:'Segoe UI',Arial,sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #2c2c2a;padding-bottom:10px;margin-bottom:14px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#2c2c2a">FICHA TÉCNICA — PEÇA ${idx+1}</div>
+        <div style="font-size:12px;color:#666">${p.local} · ${p.tipo}</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666">
+        <div>Cliente: <b>${nome||'—'}</b></div>
+        <div>Data: ${hoje}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">MEDIDAS</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Local',p.local)}
+          ${linha('Tipo de Costura',p.tipo)}
+          ${linha('Largura',p.largura?p.largura+' m':'—')}
+          ${linha('Altura',p.altura?p.altura+' m':'—')}
+        </table>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">DADOS TÉCNICOS</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Engate',p.engate)}
+          ${linha('Sustentação',p.sustentacao)}
+          ${linha('Forro',p.forro)}
+          ${linha('Prega',p.prega)}
+          ${linha('Bainha',p.bainha)}
+          ${linha('Caimento',p.caimento)}
+          ${linha('Folhas',p.folhas)}
+          ${linha('Abertura',p.abertura)}
+          ${linha('Montagem',p.montagem)}
+        </table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">DADOS COMPLEMENTARES</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Acima da Janela',p.acima_janela)}
+          ${linha('Lateral da Janela',p.lateral_janela)}
+          ${linha('Tomas',p.tomas)}
+          ${linha('Bandô',p.bandô)}
+          ${linha('Nervura',p.nervura)}
+          ${p.obs?linha('Observações',p.obs):''}
+        </table>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">ENDEREÇO DE ENTREGA</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Endereço',colEnd+(colNum?' nº '+colNum:''))}
+          ${linha('Complemento/Apto',colComp+(colApto?' / Apto '+colApto:''))}
+          ${linha('Bairro',colBairro)}
+          ${linha('Cidade',colCidade)}
+          ${linha('Data Colocação',colData?new Date(colData+'T00:00').toLocaleDateString('pt-BR'):'')}
+          ${linha('Hora',colHora)}
+        </table>
+      </div>
+    </div>
+
+    ${(p.produtos&&p.produtos.some(pr=>pr.desc))||(p.servicos&&p.servicos.some(sv=>sv.desc))?`
+    <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">PRODUTOS E SERVIÇOS</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f5f4f0">
+        <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Descrição</th>
+        <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Uni</th>
+        <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Qtd</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600;color:#666">R$ Uni</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600;color:#666">Desc%</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600;color:#666">Subtotal</th>
+      </tr></thead>
+      <tbody>
+        ${[...p.produtos.filter(pr=>pr.desc),...p.servicos.filter(sv=>sv.desc)].map(it=>`
+        <tr style="border-bottom:1px solid #f5f4f0">
+          <td style="padding:5px 8px">${it.desc}</td>
+          <td style="padding:5px 8px;text-align:center">${it.uni||'M'}</td>
+          <td style="padding:5px 8px;text-align:center">${it.qtd||'—'}</td>
+          <td style="padding:5px 8px;text-align:right">${it.preco?fmt(it.preco):'—'}</td>
+          <td style="padding:5px 8px;text-align:right">${it.desc_pct||0}%</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:600">${it._sub!=null?fmt(it._sub):'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`:''}
+
+    <div style="display:flex;justify-content:flex-end;gap:24px;margin-top:12px;padding-top:10px;border-top:1px solid #eee">
+      ${p.sobra?`<span style="font-size:12px;color:#666">Sobra: <b>${fmt(p.sobra)}</b></span>`:''}
+      ${p.viagem?`<span style="font-size:12px;color:#666">Viagem: <b>${fmt(p.viagem)}</b></span>`:''}
+      ${p.colocacao_preco?`<span style="font-size:12px;color:#666">Colocação: <b>${fmt(p.colocacao_preco)}</b></span>`:''}
+      <span style="font-size:15px;font-weight:700;color:#0f6e56">Total da Peça: ${fmt(p._total||0)}</span>
+    </div>
+  </div>`).join('');
+
+  // PAGE FINAL: Resumo financeiro
+  let totC=0,totS=0,totCol=0,totV=0;
+  pecas.forEach(p=>{
+    p.servicos.forEach(sv=>totC+=(sv._sub||0));
+    totS+=parseFloat(p.sobra)||0;
+    totCol+=parseFloat(p.colocacao_preco)||0;
+    totV+=parseFloat(p.viagem)||0;
+  });
+  const moVal=parseFloat(document.getElementById('orc-mo').value)||0;
+  totCol+=moVal;
+
+  const pageResumo=`
+  <div class="print-page" style="font-family:'Segoe UI',Arial,sans-serif">
+    <div style="border-bottom:2px solid #2c2c2a;padding-bottom:10px;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700;color:#2c2c2a">RESUMO DO ORÇAMENTO</div>
+      <div style="font-size:12px;color:#666">Cliente: <b>${nome||'—'}</b> · Data: ${hoje}</div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">
+      <thead><tr style="background:#f5f4f0">
+        <th style="padding:8px 12px;text-align:left;font-weight:600;color:#444">#</th>
+        <th style="padding:8px 12px;text-align:left;font-weight:600;color:#444">Peça / Ambiente</th>
+        <th style="padding:8px 12px;text-align:center;font-weight:600;color:#444">Tipo</th>
+        <th style="padding:8px 12px;text-align:center;font-weight:600;color:#444">Medida</th>
+        <th style="padding:8px 12px;text-align:center;font-weight:600;color:#444">Engate</th>
+        <th style="padding:8px 12px;text-align:right;font-weight:600;color:#444">Total</th>
+      </tr></thead>
+      <tbody>
+        ${pecas.map((p,i)=>`<tr style="border-bottom:1px solid #f0eeea">
+          <td style="padding:7px 12px;color:#aaa">${i+1}</td>
+          <td style="padding:7px 12px;font-weight:600">${p.local}</td>
+          <td style="padding:7px 12px;text-align:center;font-size:12px;color:#666">${p.tipo}</td>
+          <td style="padding:7px 12px;text-align:center">${p.largura||'—'} × ${p.altura||'—'} m</td>
+          <td style="padding:7px 12px;text-align:center">${p.engate}</td>
+          <td style="padding:7px 12px;text-align:right;font-weight:700;color:#0f6e56">${fmt(p._total||0)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+      <div style="background:#f9f8f5;border-radius:8px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Composição do Valor</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tr><td style="padding:4px 0;color:#666">Costura</td><td style="text-align:right;font-weight:600">${fmt(totC)}</td></tr>
+          <tr><td style="padding:4px 0;color:#666">Sobra</td><td style="text-align:right;font-weight:600">${fmt(totS)}</td></tr>
+          <tr><td style="padding:4px 0;color:#666">Colocação</td><td style="text-align:right;font-weight:600">${fmt(totCol)}</td></tr>
+          <tr><td style="padding:4px 0;color:#666">Viagem</td><td style="text-align:right;font-weight:600">${fmt(totV)}</td></tr>
+          <tr style="border-top:1px solid #ddd"><td style="padding:8px 0 4px;font-weight:700">TOTAL GERAL</td><td style="text-align:right;font-weight:700;font-size:16px;color:#0f6e56">${fmt(totalGeral)}</td></tr>
+        </table>
+      </div>
+      <div style="background:#f9f8f5;border-radius:8px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Condição de Pagamento</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tr><td style="padding:4px 0;color:#666">Forma</td><td style="text-align:right;font-weight:600">${pgtoForma||'—'}</td></tr>
+          ${pgtoEnt?`<tr><td style="padding:4px 0;color:#666">Entrada</td><td style="text-align:right;font-weight:600">R$ ${pgtoEnt}</td></tr>`:''}
+          <tr><td style="padding:4px 0;color:#666">Data Colocação</td><td style="text-align:right;font-weight:600">${colData?new Date(colData+'T00:00').toLocaleDateString('pt-BR'):'—'}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #ddd;padding-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:10px">
+      <div style="text-align:center">
+        <div style="border-top:1px solid #2c2c2a;margin-top:40px;padding-top:6px;font-size:12px;color:#666">Assinatura do Cliente</div>
+        <div style="font-size:12px;color:#666;margin-top:4px">${nome||'___________________________'}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="border-top:1px solid #2c2c2a;margin-top:40px;padding-top:6px;font-size:12px;color:#666">Assinatura da Vendedora</div>
+        <div style="font-size:12px;color:#666;margin-top:4px">${colVend||'___________________________'}</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:#aaa;margin-top:16px;text-align:center">* Orçamento válido por 15 dias. Tubarão/SC · (48) 3622-0008</div>
+  </div>`;
+
+  document.getElementById('area-impressao').innerHTML=page1+pagesPecas+pageResumo;
+}
+
+// ──────────────────────────────────────────────
+// FICHA TÉCNICA
+// ──────────────────────────────────────────────
+function renderFichaTec(){
+  const nome=g('cli-nome')||'—';
+  const colVend=g('col-vend');
+  const colData=g('col-data');
+  const colHora=g('col-hora');
+  const colEnd=g('col-end'), colNum=g('col-num'), colComp=g('col-comp');
+  const colComp2=g('col-comp2'), colBairro=g('col-bairro'), colCidade=g('col-cidade');
+  const colEdif=g('col-edif'), colCep=g('col-cep'), colEstado=g('col-estado');
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const linha=(label,val)=>val?`<tr><td style="color:#555;width:150px;padding:5px 8px;font-size:12px;vertical-align:top;border-bottom:1px solid #f5f4f0">${label}</td><td style="padding:5px 8px;font-size:13px;font-weight:600;border-bottom:1px solid #f5f4f0">${val}</td></tr>`:'';
+
+  if(!pecas.length){
+    document.getElementById('area-fichatec').innerHTML='<div class="card"><div class="empty">Nenhuma peça cadastrada ainda.</div></div>';
+    return;
+  }
+
+  const pages=pecas.map((p,idx)=>`
+  <div class="print-page" style="font-family:'Segoe UI',Arial,sans-serif">
+
+    <div style="display:flex;justify-content:space-between;align-items:start;border-bottom:3px solid #2c2c2a;padding-bottom:10px;margin-bottom:14px">
+      <div>
+        <div style="font-size:17px;font-weight:700;color:#2c2c2a">🪟 FICHA TÉCNICA DE COSTURA E COLOCAÇÃO</div>
+        <div style="font-size:12px;color:#666;margin-top:2px">Nandi Cortinas & Decor · Tubarão/SC · (48) 3622-0008</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666;line-height:1.8">
+        <div>Ficha <b>${idx+1}</b> de <b>${pecas.length}</b></div>
+        <div>Data: <b>${hoje}</b></div>
+        ${colData?`<div>Colocação: <b>${new Date(colData+'T00:00').toLocaleDateString('pt-BR')}</b>${colHora?' às <b>'+colHora+'</b>':''}</div>`:''}
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">CLIENTE / VENDEDORA</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Cliente',nome)}
+          ${linha('Vendedora',colVend)}
+        </table>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">LOCAL DE COLOCAÇÃO</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Endereço',colEnd+(colNum?' nº '+colNum:''))}
+          ${colComp?linha('Complemento',colComp):''}
+          ${colComp2?linha('Ref.',colComp2):''}
+          ${linha('Bairro / Edifício',colBairro+(colEdif?' — '+colEdif:''))}
+          ${linha('Cidade / CEP',colCidade+(colEstado?' — '+colEstado:'')+(colCep?' · CEP '+colCep:''))}
+        </table>
+      </div>
+    </div>
+
+    <div style="background:#f5f4f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+      <div style="font-size:13px"><span style="color:#888;font-size:11px;display:block">LOCAL</span><b>${p.local}</b></div>
+      <div style="font-size:13px"><span style="color:#888;font-size:11px;display:block">TIPO</span><b>${p.tipo}</b></div>
+      <div style="font-size:13px"><span style="color:#888;font-size:11px;display:block">LARGURA</span><b>${p.largura||'—'} m</b></div>
+      <div style="font-size:13px"><span style="color:#888;font-size:11px;display:block">ALTURA</span><b>${p.altura||'—'} m</b></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">DADOS TÉCNICOS</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Engate',p.engate)}
+          ${linha('Sustentação',p.sustentacao)}
+          ${linha('Forro',p.forro)}
+          ${linha('Prega',p.prega)}
+          ${linha('Bainha',p.bainha)}
+          ${linha('Caimento',p.caimento)}
+          ${linha('Folhas',p.folhas)}
+          ${linha('Abertura',p.abertura)}
+          ${linha('Montagem',p.montagem)}
+        </table>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">DADOS COMPLEMENTARES</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${linha('Acima da Janela',p.acima_janela)}
+          ${linha('Lateral da Janela',p.lateral_janela)}
+          ${linha('Tomas',p.tomas)}
+          ${linha('Bandô',p.bandô)}
+          ${linha('Nervura',p.nervura)}
+          ${p.obs?linha('Observações',p.obs):''}
+        </table>
+
+        ${p.servicos&&p.servicos.some(sv=>sv.desc)?`
+        <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px;margin-top:14px">SERVIÇOS DE COSTURA</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          ${p.servicos.filter(sv=>sv.desc).map(sv=>`
+          <tr style="border-bottom:1px solid #f5f4f0">
+            <td style="padding:4px 0;color:#333">${sv.desc}</td>
+            <td style="padding:4px 0;text-align:right;color:#888;white-space:nowrap">${sv.qtd||'—'} ${sv.uni}</td>
+          </tr>`).join('')}
+        </table>`:''}
+      </div>
+    </div>
+
+    ${p.produtos&&p.produtos.some(pr=>pr.desc)?`
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">PRODUTOS</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:#f5f4f0">
+          <th style="padding:6px 8px;text-align:left">Descrição</th>
+          <th style="padding:6px 8px;text-align:center">Uni</th>
+          <th style="padding:6px 8px;text-align:center">Qtd</th>
+        </tr></thead>
+        <tbody>
+          ${p.produtos.filter(pr=>pr.desc).map(pr=>`
+          <tr style="border-bottom:1px solid #f5f4f0">
+            <td style="padding:5px 8px">${pr.desc}</td>
+            <td style="padding:5px 8px;text-align:center">${pr.uni}</td>
+            <td style="padding:5px 8px;text-align:center">${pr.qtd||'—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`:''}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+      <div style="border:1px dashed #ccc;border-radius:8px;padding:10px;min-height:100px">
+        <div style="font-size:10px;color:#aaa;margin-bottom:6px;font-weight:600">OBSERVAÇÕES / ESBOÇO</div>
+        <div style="font-size:12px;color:#444">${p.obs||''}</div>
+      </div>
+      <div style="border-top:1px solid #2c2c2a;margin-top:60px;padding-top:6px;text-align:center">
+        <div style="font-size:12px;color:#666">Assinatura / Conferência</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px">${colVend||'___________________________'}</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:#aaa;text-align:right;margin-top:10px">* Imagens meramente ilustrativas · Orçamento válido por 15 dias</div>
+  </div>`).join('');
+
+  document.getElementById('area-fichatec').innerHTML=pages;
+}
+
+// ──────────────────────────────────────────────
+// LISTA COSTURA
+// ──────────────────────────────────────────────
+function renderCostura(){
+  document.getElementById('tb-costura').innerHTML=LISTA_COSTURA.map(c=>`
+    <tr>
+      <td><span style="font-size:14px;font-weight:700;color:#2c2c2a;letter-spacing:0.02em">${String(c.cod).replace(/(\d{3})(\d{3})/,'$1.$2')}</span></td>
+      <td>${c.desc}</td>
+      <td><span class="tag tag-blue">${c.uni}</span></td>
+      <td><div class="costura-preco"><span>${fmt(c.costura)}</span></div></td>
+      <td><div class="costura-preco"><span style="background:#faeeda;color:#854f0b">${fmt(c.cliente)}</span></div></td>
+    </tr>`).join('');
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+function copiarEnderecoCliente(){
+  const mapa=[
+    ['cli-cep','col-cep'],['cli-end','col-end'],['cli-num','col-num'],
+    ['cli-comp','col-comp'],['cli-comp2','col-comp2'],['cli-edif','col-edif'],
+    ['cli-bairro','col-bairro'],['cli-cidade','col-cidade'],['cli-estado','col-estado'],
+  ];
+  mapa.forEach(([src,dst])=>{
+    const s=document.getElementById(src);
+    const d=document.getElementById(dst);
+    if(s&&d&&s.value) d.value=s.value;
+  });
+}
+
+function mascaraCepCol(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>5) v=v.substring(0,5)+'-'+v.substring(5,8);
+  el.value=v;
+  if(v.replace(/\D/g,'').length===8) buscarCepCol(v);
+}
+
+function buscarCepCol(cep){
+  const digits=cep.replace(/\D/g,'');
+  if(digits.length!==8) return;
+  const status=document.getElementById('col-cep-status');
+  status.textContent='🔄 Buscando...';
+  status.style.color='#888';
+  window._cepColCallback=function(data){
+    const s=document.getElementById('col-cep-status');
+    if(!data||data.erro){
+      s.textContent='❌ CEP não encontrado';
+      s.style.color='#a32d2d';
+    } else {
+      document.getElementById('col-end').value=data.logradouro||'';
+      document.getElementById('col-bairro').value=data.bairro||'';
+      document.getElementById('col-cidade').value=data.localidade||'';
+      document.getElementById('col-estado').value=data.uf||'';
+      s.textContent='✅ Endereço preenchido';
+      s.style.color='#0f6e56';
+      document.getElementById('col-num').focus();
+      setTimeout(()=>s.textContent='',3000);
+    }
+    const old=document.getElementById('_cep_col_script');
+    if(old) old.remove();
+  };
+  const old=document.getElementById('_cep_col_script');
+  if(old) old.remove();
+  const script=document.createElement('script');
+  script.id='_cep_col_script';
+  script.src=`https://viacep.com.br/ws/${digits}/json/?callback=_cepColCallback`;
+  script.onerror=function(){
+    const s=document.getElementById('col-cep-status');
+    s.textContent='❌ Sem conexão com internet';
+    s.style.color='#a32d2d';
+    this.remove();
+  };
+  document.head.appendChild(script);
+}
+
+function mascaraTel(el){
+  let v = el.value.replace(/\D/g,'');
+  if(v.length === 0){ el.value=''; return; }
+  // DDD
+  if(v.length <= 2){
+    el.value = '(' + v;
+  } else if(v.length <= 10){
+    // Fixo: (48) 3622-0008 — 8 dígitos após DDD
+    el.value = '(' + v.substring(0,2) + ') ' + v.substring(2,6) + (v.length>6?'-'+v.substring(6,10):'');
+  } else {
+    // Celular: (48) 9 9931-9845 — 9 dígitos após DDD
+    el.value = '(' + v.substring(0,2) + ') ' + v.substring(2,3) + ' ' + v.substring(3,7) + (v.length>7?'-'+v.substring(7,11):'');
+  }
+}
+
+function mascaraQtd(el){
+  let v = el.value.replace(/[^0-9,]/g,'');
+  const partes = v.split(',');
+  let inteiro = partes[0].replace(/\./g,'');
+  if(inteiro.length > 3){
+    inteiro = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  }
+  el.value = partes.length > 1 ? inteiro + ',' + partes[1] : inteiro;
+}
+
+function formatarQtd(v){
+  if(v === null || v === undefined || v === '') return '';
+  const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/\./g,'').replace(',','.'));
+  if(isNaN(n)) return '';
+  // inteiro: sem decimais | decimal: sempre 2 casas
+  let str = Number.isInteger(n) ? n.toString() : n.toFixed(2).replace('.',',');
+  const partes = str.split(',');
+  if(partes[0].length > 3){
+    partes[0] = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  }
+  return partes.length > 1 ? partes[0]+','+partes[1] : partes[0];
+}
+
+function parseQtd(v){
+  if(!v && v !== 0) return 0;
+  // se já é número JS, retorna direto
+  if(typeof v === 'number') return v;
+  return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
+}
+
+function parseQtd(v){
+  if(!v) return 0;
+  return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
+}
+
+function calcSubtotalRow(prefix, pid){
+  const qtd   = parseQtd(document.getElementById(prefix+'_qtd')?.value||'');
+  const preco  = parseMoeda(document.getElementById(prefix+'_preco')?.value||'');
+  const descStr= (document.getElementById(prefix+'_descpct')?.value||'0').replace('%','').replace(',','.');
+  const desc   = parseFloat(descStr)||0;
+  const sub    = qtd * preco;
+  const subDesc= sub - sub*(desc/100);
+  const subEl  = document.getElementById(prefix+'_sub');
+  if(subEl) subEl.textContent = subDesc>0 ? fmt(subDesc) : '—';
+  savePecaFromDOM(pid);
+}
+
+function mascaraPct(el){
+  let v=el.value.replace('%','').replace(/[^0-9,\.]/g,'');
+  if(v) el.value=v+'%';
+  else el.value='';
+}
+
+function mascaraMoeda(el){
+  let v=el.value.replace(/\D/g,'');
+  if(!v){el.value='';return;}
+  v=(parseInt(v)/100).toFixed(2);
+  el.value='R$ '+v.replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+function formatarMoeda(v){
+  if(!v) return '';
+  return 'R$ '+parseFloat(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+function parseMoeda(v){
+  if(!v) return 0;
+  // Remove R$, espaços e pontos de milhar, troca vírgula por ponto
+  return parseFloat(v.toString().replace('R$','').replace(/\s/g,'').replace(/\./g,'').replace(',','.')) || 0;
+}
+
+function mascaraCodProd(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v) v=parseInt(v).toLocaleString('pt-BR');
+  el.value=v;
+}
+
+function mascaraCodCli(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v) v=parseInt(v).toLocaleString('pt-BR');
+  el.value=v;
+}
+
+function mascaraCep(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>5) v=v.substring(0,5)+'-'+v.substring(5,8);
+  el.value=v;
+  if(v.replace(/\D/g,'').length===8) buscarCep(v);
+}
+
+function buscarCep(cep){
+  const digits=cep.replace(/\D/g,'');
+  if(digits.length!==8) return;
+  const status=document.getElementById('cep-status');
+  status.textContent='🔄 Buscando...';
+  status.style.color='#888';
+
+  window._cepCallback=function(data){
+    const s=document.getElementById('cep-status');
+    if(!data||data.erro){
+      s.textContent='❌ CEP não encontrado';
+      s.style.color='#a32d2d';
+    } else {
+      document.getElementById('cli-end').value=data.logradouro||'';
+      document.getElementById('cli-bairro').value=data.bairro||'';
+      document.getElementById('cli-cidade').value=data.localidade||'';
+      document.getElementById('cli-estado').value=data.uf||'';
+      s.textContent='✅ Endereço preenchido';
+      s.style.color='#0f6e56';
+      document.getElementById('cli-num').focus();
+      setTimeout(()=>s.textContent='',3000);
+    }
+    const old=document.getElementById('_cep_script');
+    if(old) old.remove();
+  };
+
+  const old=document.getElementById('_cep_script');
+  if(old) old.remove();
+  const script=document.createElement('script');
+  script.id='_cep_script';
+  script.src=`https://viacep.com.br/ws/${digits}/json/?callback=_cepCallback`;
+  script.onerror=function(){
+    const s=document.getElementById('cep-status');
+    s.textContent='❌ Sem conexão com internet';
+    s.style.color='#a32d2d';
+    this.remove();
+  };
+  document.head.appendChild(script);
+}
+
+async function buscarPorCpfCnpj(valor){
+  const digits = valor.replace(/\D/g,'');
+  const status = document.getElementById('cpf-status');
+  if(digits.length < 11) return;
+
+  status.textContent = '🔄 Buscando...';
+  status.style.color = '#888';
+
+  // 1. Busca no banco de dados do sistema (CPF e CNPJ)
+  if(currentUser && userDoc){
+    try {
+      let query = db.collection('clientes').where('dados.cpf','==',valor);
+      if(userDoc.role==='vendedora') query = query.where('vendedoraNome','==',userDoc.vendedoraNome);
+      const snap = await query.get();
+      if(!snap.empty){
+        const cli = snap.docs[0].data();
+        const confirmar = confirm(`✅ Cliente encontrado no sistema:\n\n👤 ${cli.nome}\n\nDeseja carregar os dados deste cliente?`);
+        if(confirmar){
+          clienteAtualId = snap.docs[0].id;
+          preencherDadosCliente(cli.dados);
+          pecas = [];
+          if(cli.orcamentos && cli.orcamentos.length > 0){
+            pecas = JSON.parse(JSON.stringify(cli.orcamentos[cli.orcamentos.length-1].pecas));
+          }
+          savePecas(); renderPecas(); atualizarBarraCliente();
+          status.textContent = '✅ Cliente carregado do sistema';
+          status.style.color = '#0f6e56';
+          setTimeout(()=>status.textContent='',3000);
+          return;
+        }
+        status.textContent = '';
+        return;
+      }
+    } catch(e){ console.log('Erro na busca Firebase:', e); }
+  }
+
+  // 2. Se CNPJ (14 dígitos), busca na Receita Federal
+  if(digits.length === 14){
+    status.textContent = '🔄 Buscando na Receita Federal...';
+    window._cnpjCallback = function(data){
+      const s = document.getElementById('cpf-status');
+      const old = document.getElementById('_cnpj_script');
+      if(old) old.remove();
+      if(data.status==='ERROR'||!data.nome){
+        s.textContent = '❌ CNPJ não encontrado';
+        s.style.color = '#a32d2d';
+        setTimeout(()=>s.textContent='',3000);
+        return;
+      }
+      const nomeEl = document.getElementById('cli-nome');
+      const confirmar = confirm(`✅ Empresa encontrada na Receita Federal:\n\n🏢 ${data.nome}\n📍 ${data.municipio||''} — ${data.uf||''}\n\nDeseja preencher o nome automaticamente?`);
+      if(confirmar){
+        nomeEl.value = data.nome.toUpperCase();
+        // preenche cidade/estado se campos estiverem vazios
+        if(!document.getElementById('cli-cidade').value && data.municipio)
+          document.getElementById('cli-cidade').value = data.municipio;
+        if(!document.getElementById('cli-estado').value && data.uf)
+          document.getElementById('cli-estado').value = data.uf;
+        s.textContent = '✅ Dados da Receita Federal preenchidos';
+        s.style.color = '#0f6e56';
+      } else {
+        s.textContent = '';
+      }
+      setTimeout(()=>s.textContent='',3000);
+    };
+    const old = document.getElementById('_cnpj_script');
+    if(old) old.remove();
+    const script = document.createElement('script');
+    script.id = '_cnpj_script';
+    script.src = `https://receitaws.com.br/v1/cnpj/${digits}?callback=_cnpjCallback`;
+    script.onerror = function(){
+      const s = document.getElementById('cpf-status');
+      s.textContent = '❌ Sem conexão ou limite da API atingido';
+      s.style.color = '#a32d2d';
+      setTimeout(()=>s.textContent='',4000);
+      this.remove();
+    };
+    document.head.appendChild(script);
+  } else if(digits.length === 11){
+    // CPF — só busca interna (já feita acima), não encontrado
+    status.textContent = '💡 CPF não encontrado no sistema — novo cliente';
+    status.style.color = '#888';
+    setTimeout(()=>status.textContent='',3000);
+  }
+}
+
+function mascaraCpfCnpj(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length<=11){
+    v=v.replace(/(\d{3})(\d)/,'$1.$2');
+    v=v.replace(/(\d{3})(\d)/,'$1.$2');
+    v=v.replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  } else {
+    v=v.replace(/(\d{2})(\d)/,'$1.$2');
+    v=v.replace(/(\d{3})(\d)/,'$1.$2');
+    v=v.replace(/(\d{3})(\d)/,'$1/$2');
+    v=v.replace(/(\d{4})(\d{1,2})$/,'$1-$2');
+  }
+  el.value=v;
+}
+
+// BANCO DE DADOS → gerenciado pelo Firebase (ver abaixo)
+function salvarClientesDB(){} // substituído pelo Firebase
+
+// Funções de clientes movidas para seção Firebase abaixo
+
+document.getElementById('data-header').innerHTML=new Date().toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderPecas();
+
+// ──────────────────────────────────────────────
+// FIREBASE
+// ──────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCRrLpRoskBNFysNjbzGeMoZsWJZs1bwHI",
+  authDomain: "nandi-cortinas.firebaseapp.com",
+  projectId: "nandi-cortinas",
+  storageBucket: "nandi-cortinas.firebasestorage.app",
+  messagingSenderId: "836738287862",
+  appId: "1:836738287862:web:e08ef215da1a535413c4d7"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let userDoc = null; // {role, nome, vendedoraNome}
+
+// LOGIN
+async function fazerLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const err = document.getElementById('login-err');
+  const btn = document.getElementById('btn-login');
+  err.style.display='none';
+  btn.textContent='Entrando...';
+  btn.disabled=true;
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+  } catch(e) {
+    err.textContent = e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
+      ? 'E-mail ou senha incorretos.' : 'Erro ao entrar. Tente novamente.';
+    err.style.display='block';
+    btn.textContent='Entrar';
+    btn.disabled=false;
+  }
+}
+
+function fazerLogout(){
+  if(!confirm('Deseja sair do sistema?')) return;
+  auth.signOut();
+}
+
+// OBSERVER DE AUTENTICAÇÃO
+auth.onAuthStateChanged(async user => {
+  if(user){
+    currentUser = user;
+    // Carrega perfil do Firestore
+    const snap = await db.collection('usuarios').doc(user.email).get();
+    if(!snap.exists){ auth.signOut(); alert('Usuário sem permissão.'); return; }
+    userDoc = snap.data();
+
+    // Mostra sistema
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('user-bar').style.display='flex';
+    document.getElementById('user-nome').textContent = userDoc.nome;
+    document.getElementById('user-role-badge').textContent = userDoc.role==='admin' ? '👑 Admin' : '🏷️ Vendedora';
+
+    // Se vendedora, pré-seleciona e trava o campo vendedora
+    if(userDoc.role==='vendedora'){
+      const sel = document.getElementById('col-vend');
+      if(sel){
+        sel.value = userDoc.vendedoraNome;
+        sel.disabled = true;
+      }
+    }
+
+    renderClientes();
+    renderHistorico();
+    atualizarBarraCliente();
+  } else {
+    currentUser = null;
+    userDoc = null;
+    document.getElementById('login-overlay').classList.remove('hidden');
+    document.getElementById('user-bar').style.display='none';
+    document.getElementById('btn-login').textContent='Entrar';
+    document.getElementById('btn-login').disabled=false;
+  }
+});
+
+// ──────────────────────────────────────────────
+// BANCO DE DADOS — FIRESTORE
+// ──────────────────────────────────────────────
+let clienteAtualId = null;
+let clientesCache = []; // cache local para performance
+
+function coletarDadosCliente(){
+  return {
+    nome: g('cli-nome'), cpf: g('cli-cpf'), rg: g('cli-rg'),
+    cel: g('cli-cel'), telRes: g('cli-tel-res'), telCom: g('cli-tel-com'),
+    email: g('cli-email'), vendedora: g('col-vend'), codCli: g('cod-cli'),
+    end: g('cli-end'), num: g('cli-num'), comp: g('cli-comp'), comp2: g('cli-comp2'),
+    bairro: g('cli-bairro'), edif: g('cli-edif'), cidade: g('cli-cidade'),
+    estado: g('cli-estado'), cep: g('cli-cep'),
+    colData: g('col-data'), colHora: g('col-hora'),
+    colEnd: g('col-end'), colNum: g('col-num'), colComp: g('col-comp'),
+    colComp2: g('col-comp2'), colBairro: g('col-bairro'), colEdif: g('col-edif'),
+    colCidade: g('col-cidade'), colEstado: g('col-estado'), colCep: g('col-cep'),
+    respNome: g('resp-nome'), respTel: g('resp-tel'),
+    porteiro: g('porteiro'), horarioEntrega: g('horario-entrega'),
+    qtdPecas: g('qtd-pecas'), pgtoForma: g('pgto-forma'), pgtoEntrada: g('pgto-entrada'),
+    obs: g('cli-obs'),
+  };
+}
+
+function preencherDadosCliente(d){
+  const map = {
+    'cli-nome':d.nome,'cli-cpf':d.cpf,'cli-rg':d.rg,'cli-cel':d.cel,
+    'cli-tel-res':d.telRes,'cli-tel-com':d.telCom,'cli-email':d.email,
+    'cod-cli':d.codCli,'cli-end':d.end,'cli-num':d.num,'cli-comp':d.comp,
+    'cli-comp2':d.comp2,'cli-bairro':d.bairro,'cli-edif':d.edif,
+    'cli-cidade':d.cidade,'cli-estado':d.estado,'cli-cep':d.cep,
+    'col-data':d.colData,'col-hora':d.colHora,'col-end':d.colEnd,
+    'col-num':d.colNum,'col-comp':d.colComp,'col-comp2':d.colComp2,
+    'col-bairro':d.colBairro,'col-edif':d.colEdif,'col-cidade':d.colCidade,
+    'col-estado':d.colEstado,'col-cep':d.colCep,'resp-nome':d.respNome,
+    'resp-tel':d.respTel,'porteiro':d.porteiro,'horario-entrega':d.horarioEntrega,
+    'qtd-pecas':d.qtdPecas,'pgto-forma':d.pgtoForma,'pgto-entrada':d.pgtoEntrada,
+    'cli-obs':d.obs,
+  };
+  Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if(el&&val!=null) el.value=val; });
+  const sv=document.getElementById('col-vend');
+  if(sv&&d.vendedora){
+    sv.value=d.vendedora;
+    if(userDoc&&userDoc.role==='vendedora') sv.disabled=true;
+  }
+}
+
+async function salvarClienteAtual(){
+  if(!currentUser||!userDoc){ alert('Você precisa estar logado.'); return; }
+  const dados = coletarDadosCliente();
+  if(!dados.nome){ alert('Preencha o nome do cliente antes de salvar.'); return; }
+  const total = pecas.reduce((s,p)=>s+(p._total||0),0);
+  const vendedoraNome = userDoc.role==='admin' ? (dados.vendedora||'admin') : userDoc.vendedoraNome;
+  const temPecas = pecas.length > 0;
+
+  try {
+    if(clienteAtualId){
+      const ref = db.collection('clientes').doc(clienteAtualId);
+      const snap = await ref.get();
+      if(snap.exists){
+        const cli = snap.data();
+        const orcamentos = cli.orcamentos||[];
+        if(temPecas){
+          const orcamento = {
+            id: Date.now(),
+            data: new Date().toLocaleDateString('pt-BR'),
+            pecas: JSON.parse(JSON.stringify(pecas)),
+            total, pgto: dados.pgtoForma,
+          };
+          if(cli._orcAtual!=null) orcamentos[cli._orcAtual]=orcamento;
+          else orcamentos.push(orcamento);
+        }
+        await ref.update({ dados, nome:dados.nome, updatedAt:new Date().toLocaleDateString('pt-BR'), orcamentos, vendedoraNome });
+      }
+    } else {
+      const docData = {
+        nome:dados.nome, dados, vendedoraNome,
+        createdAt:new Date().toLocaleDateString('pt-BR'),
+        updatedAt:new Date().toLocaleDateString('pt-BR'),
+        orcamentos:[], _orcAtual:null,
+      };
+      if(temPecas){
+        const orcamento = {
+          id: Date.now(),
+          data: new Date().toLocaleDateString('pt-BR'),
+          pecas: JSON.parse(JSON.stringify(pecas)),
+          total, pgto: dados.pgtoForma,
+        };
+        docData.orcamentos = [orcamento];
+        docData._orcAtual = 0;
+      }
+      const ref = await db.collection('clientes').add(docData);
+      clienteAtualId = ref.id;
+    }
+    atualizarBarraCliente();
+    alert(temPecas
+      ? `Cliente "${dados.nome}" salvo com orçamento! ☁️`
+      : `Cliente "${dados.nome}" salvo sem orçamento — adicione peças quando quiser. ☁️`);
+    renderClientes();
+  } catch(e){ alert('Erro ao salvar: '+e.message); }
+}
+
+async function abrirCliente(cid, orcIdx){
+  const snap = await db.collection('clientes').doc(cid).get();
+  if(!snap.exists) return;
+  const cli = snap.data();
+  clienteAtualId = cid;
+  const idx = orcIdx!=null ? orcIdx : (cli.orcamentos.length-1);
+  await db.collection('clientes').doc(cid).update({_orcAtual:idx});
+  preencherDadosCliente(cli.dados);
+  const orc = cli.orcamentos[idx];
+  pecas = orc ? JSON.parse(JSON.stringify(orc.pecas)) : [];
+  savePecas();
+  atualizarBarraCliente();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-cliente').classList.add('active');
+  document.querySelector('[onclick="showTab(\'cliente\',this)"]').classList.add('active');
+  renderPecas();
+  alert(`Cliente "${cli.nome}" carregado — Orçamento ${idx+1} de ${cli.orcamentos.length}`);
+}
+
+async function novoOrcamentoCliente(cid){
+  const snap = await db.collection('clientes').doc(cid).get();
+  if(!snap.exists) return;
+  const cli = snap.data();
+  clienteAtualId = cid;
+  await db.collection('clientes').doc(cid).update({_orcAtual:null});
+  preencherDadosCliente(cli.dados);
+  pecas=[]; savePecas();
+  atualizarBarraCliente();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-pecas').classList.add('active');
+  document.querySelector('[onclick="showTab(\'pecas\',this)"]').classList.add('active');
+  renderPecas();
+}
+
+function novoOrcamento(){
+  clienteAtualId=null; pecas=[]; savePecas();
+  document.querySelectorAll('#tab-cliente input, #tab-cliente select, #tab-cliente textarea').forEach(el=>{
+    if(el.id==='col-vend'&&userDoc&&userDoc.role==='vendedora'){el.value=userDoc.vendedoraNome;return;}
+    if(el.type==='time') el.value='09:00';
+    else if(el.id==='cli-cidade'||el.id==='col-cidade') el.value='Tubarão';
+    else if(el.id==='cli-estado'||el.id==='col-estado') el.value='SC';
+    else if(el.id==='qtd-pecas') el.value='1';
+    else el.value='';
+  });
+  atualizarBarraCliente();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-cliente').classList.add('active');
+  document.querySelector('[onclick="showTab(\'cliente\',this)"]').classList.add('active');
+  renderPecas();
+}
+
+async function excluirCliente(cid){
+  if(!confirm('Tem certeza que deseja excluir este cliente e todos seus orçamentos?')) return;
+  await db.collection('clientes').doc(cid).delete();
+  if(clienteAtualId===cid){clienteAtualId=null;atualizarBarraCliente();}
+  renderClientes();
+}
+
+async function excluirOrcamentoCliente(cid, orcIdx){
+  if(!confirm('Excluir este orçamento?')) return;
+  const snap = await db.collection('clientes').doc(cid).get();
+  if(!snap.exists) return;
+  const cli = snap.data();
+  cli.orcamentos.splice(orcIdx,1);
+  await db.collection('clientes').doc(cid).update({orcamentos:cli.orcamentos});
+  renderClientes();
+}
+
+function atualizarBarraCliente(){
+  const bar=document.getElementById('cliente-bar');
+  const nomeEl=document.getElementById('cliente-bar-nome');
+  if(clienteAtualId){
+    const cli=clientesCache.find(c=>c.id===clienteAtualId);
+    bar.style.display='flex';
+    nomeEl.textContent=cli?`${cli.nome} — Orçamento ${(cli._orcAtual!=null?cli._orcAtual+1:'Novo')}`:'Cliente';
+  } else {
+    bar.style.display='flex';
+    nomeEl.textContent='Novo Orçamento';
+  }
+}
+
+async function renderClientes(){
+  if(!currentUser||!userDoc) return;
+  const el=document.getElementById('lista-clientes-db');
+  if(!el) return;
+  el.innerHTML='<div class="card"><div class="empty">⏳ Carregando...</div></div>';
+  const busca=(document.getElementById('busca-cliente').value||'').toLowerCase();
+  let query = db.collection('clientes').orderBy('updatedAt','desc');
+  if(userDoc.role==='vendedora') query=query.where('vendedoraNome','==',userDoc.vendedoraNome);
+  const snap=await query.get();
+  clientesCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+  let lista=clientesCache;
+  if(busca) lista=lista.filter(c=>
+    (c.nome||'').toLowerCase().includes(busca)||
+    (c.dados?.cpf||'').includes(busca)||
+    (c.dados?.cel||'').includes(busca)||
+    (c.dados?.email||'').toLowerCase().includes(busca)
+  );
+  if(!lista.length){
+    el.innerHTML=`<div class="card"><div class="empty">${busca?'Nenhum cliente encontrado.':'Nenhum cliente cadastrado ainda. Preencha os dados e clique em 💾 Salvar Cliente.'}</div></div>`;
+    return;
+  }
+  el.innerHTML=lista.map(cli=>`
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#2c2c2a">${cli.nome}</div>
+          <div style="font-size:12px;color:#888;margin-top:2px">
+            ${cli.dados?.cpf?'CPF: '+cli.dados.cpf+' · ':''}${cli.dados?.cel||cli.dados?.telRes||''}
+            ${cli.dados?.email?' · '+cli.dados.email:''}
+          </div>
+          <div style="font-size:12px;color:#aaa;margin-top:2px">
+            ${cli.dados?.bairro?cli.dados.bairro+' — ':''}${cli.dados?.cidade||''}
+            · Cadastro: ${cli.createdAt} · Atualizado: ${cli.updatedAt}
+            ${userDoc.role==='admin'&&cli.vendedoraNome?` · <span style="color:#185fa5">👤 ${cli.vendedoraNome}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-outline" style="font-size:12px;padding:5px 10px" onclick="novoOrcamentoCliente('${cli.id}')">➕ Novo Orç.</button>
+          <button class="btn btn-red" style="font-size:12px;padding:5px 10px" onclick="excluirCliente('${cli.id}')">🗑️</button>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">
+        ${(cli.orcamentos||[]).length} orçamento(s)
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${(cli.orcamentos||[]).map((orc,i)=>`
+          <div style="background:#f5f4f0;border-radius:8px;padding:10px 14px;min-width:160px;cursor:pointer;border:2px solid ${clienteAtualId===cli.id&&cli._orcAtual===i?'#2c2c2a':'transparent'}"
+            onclick="abrirCliente('${cli.id}',${i})">
+            <div style="font-size:11px;color:#888;margin-bottom:2px">Orçamento ${i+1}</div>
+            <div style="font-size:13px;font-weight:700;color:#0f6e56">${fmt(orc.total||0)}</div>
+            <div style="font-size:11px;color:#aaa;margin-top:2px">${orc.data} · ${orc.pecas.length} peça(s)</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">${orc.pgto||''}</div>
+            <button onclick="event.stopPropagation();excluirOrcamentoCliente('${cli.id}',${i})"
+              style="margin-top:6px;background:none;border:none;color:#ccc;font-size:11px;cursor:pointer;padding:0">🗑️ excluir</button>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderHistorico(){
+  document.getElementById('hist-count').textContent='Use a aba 👥 Clientes para ver todos os orçamentos salvos na nuvem.';
+  document.getElementById('lista-historico').innerHTML='<div class="card"><div class="empty">O histórico agora fica na aba 👥 Clientes — salvo na nuvem e acessível por todos.</div></div>';
+}
+</script>
+</body>
+</html>
