@@ -99,7 +99,13 @@ table.lista tr:hover td{background:#fafaf8}
     <div class="login-sub">Orçamento de Costura — Acesso restrito</div>
     <div class="login-err" id="login-err"></div>
     <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.app" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
-    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+    <div class="field">
+      <label>Senha</label>
+      <div style="position:relative">
+        <input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()" style="padding-right:40px">
+        <button type="button" onclick="toggleSenha()" id="toggle-senha-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;color:#888" title="Mostrar senha">👁️</button>
+      </div>
+    </div>
     <button class="btn btn-dark btn-full" onclick="fazerLogin()" id="btn-login" style="margin-top:8px">Entrar</button>
     <div style="font-size:11px;color:#aaa;margin-top:14px;text-align:center">Esqueceu a senha? Fale com o administrador.</div>
   </div>
@@ -245,7 +251,7 @@ table.lista tr:hover td{background:#fafaf8}
       <div class="card">
         <div class="card-title">Responsável / Portaria</div>
         <div class="field"><label>Responsável pelo Recebimento</label><input id="resp-nome" placeholder="Nome do responsável"></div>
-        <div class="field"><label>Telefone do Responsável</label><input id="resp-tel" placeholder="Telefone"></div>
+        <div class="field"><label>Telefone do Responsável</label><input id="resp-tel" placeholder="(48) 9 9931-9845" oninput="mascaraTel(this)" maxlength="16"></div>
         <div class="field"><label>Nome do Porteiro</label><input id="porteiro" placeholder="Nome do porteiro"></div>
         <div class="field"><label>Horário Permitido de Entrega no Edifício</label><input id="horario-entrega" placeholder="ex: 08h às 18h"></div>
         <div class="field"><label>Quantidade de Peças</label><input id="qtd-pecas" type="number" min="1" value="1"></div>
@@ -642,11 +648,11 @@ function showTab(id,btn){
 // ──────────────────────────────────────────────
 function addPeca(){
   const id = Date.now();
-  pecas.push({id, tipo:'CORTINA', local:'SALA', largura:'', altura:'',
-    engate:'ARGOLA', sustentacao:'VARÃO', forro:'SEM FORRO', prega:'FRANZIDA',
-    bainha:'15 CM', caimento:'1 CM DO CHÃO', folhas:'2 FOLHAS', abertura:'DIREITA',
-    montagem:'PAREDE', acima_janela:'20 CM', lateral_janela:'25 CM', tomas:'NÃO',
-    bandô:'NÃO', nervura:'NÃO', obs:'',
+  pecas.push({id, tipo:'', local:'', largura:'', altura:'',
+    engate:'', sustentacao:'', forro:'', prega:'',
+    bainha:'', caimento:'', folhas:'', abertura:'',
+    montagem:'', acima_janela:'', lateral_janela:'', tomas:'',
+    bandô:'', nervura:'', obs:'',
     produtos:[{cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0},
               {cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0},
               {cod:'',desc:'',uni:'M',qtd:'',preco:'',desc_pct:0}],
@@ -697,7 +703,7 @@ function savePecaFromDOM(pid){
       uni:document.getElementById(`p${pid}_sv${i}_uni`).value,
       qtd:parseQtd(document.getElementById(`p${pid}_sv${i}_qtd`).value),
       preco:parseMoeda(document.getElementById(`p${pid}_sv${i}_preco`).value),
-      desc_pct:document.getElementById(`p${pid}_sv${i}_descpct`).value,
+      desc_pct:parseFloat((document.getElementById(`p${pid}_sv${i}_descpct`).value||'0').replace('%','').replace(',','.'))||0,
     });i++;
   }
   p.colocacoes=[];
@@ -709,7 +715,7 @@ function savePecaFromDOM(pid){
       uni:document.getElementById(`p${pid}_cl${i}_uni`).value,
       qtd:parseQtd(document.getElementById(`p${pid}_cl${i}_qtd`).value),
       preco:parseMoeda(document.getElementById(`p${pid}_cl${i}_preco`).value),
-      desc_pct:document.getElementById(`p${pid}_cl${i}_descpct`).value,
+      desc_pct:parseFloat((document.getElementById(`p${pid}_cl${i}_descpct`).value||'0').replace('%','').replace(',','.'))||0,
     });i++;
   }
   savePecas();
@@ -756,6 +762,7 @@ function calcPeca(pid){
   savePecas();
   const el=document.getElementById(`p${pid}_total`);
   if(el) el.textContent=fmt(p._total);
+  atualizarHeaderPeca(pid);
 }
 
 function addProdutoPeca(pid){
@@ -798,15 +805,15 @@ function renderColocacaoRow(pid,cl,i){
         <option value="">— Selecionar da lista —</option>
         ${opts}
       </select>
+      <input type="hidden" id="${prefix}_cod" value="${cl.cod||''}">
+      <input type="hidden" id="${prefix}_desc" value="${cl.desc||''}">
     </td>
-    <input type="hidden" id="${prefix}_cod" value="${cl.cod||''}">
-    <input type="hidden" id="${prefix}_desc" value="${cl.desc||''}">
     <td><select id="${prefix}_uni" onchange="savePecaFromDOM(${pid})" style="width:58px;padding:7px 2px;text-align:center"><option${cl.uni==='M'?' selected':''}>M</option><option${cl.uni==='PÇ'?' selected':''}>PÇ</option><option${cl.uni==='UNI'?' selected':''}>UNI</option><option${cl.uni==='PAR'?' selected':''}>PAR</option></select></td>
     <td><input id="${prefix}_qtd" type="text" value="${cl.qtd?formatarQtd(cl.qtd):''}" style="width:70px" placeholder="0,00" oninput="mascaraQtd(this);calcSubtotalRow('${prefix}',${pid})"></td>
     <td><input id="${prefix}_preco" type="text" value="${cl.preco?formatarMoeda(cl.preco):''}" style="width:110px" placeholder="R$ 0,00" oninput="mascaraMoeda(this);calcSubtotalRow('${prefix}',${pid})"></td>
-    <td><input id="${prefix}_descpct" type="number" min="0" max="100" value="${cl.desc_pct||0}" style="width:55px" placeholder="%" oninput="calcSubtotalRow('${prefix}',${pid})"></td>
-    <td style="font-weight:600;text-align:right;white-space:nowrap" id="${prefix}_sub">${cl._sub!=null&&cl._sub>0?fmt(cl._sub):'—'}</td>
-    <td><button onmousedown="event.preventDefault()" onclick="removerRow(${pid},${i},'cl')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
+    <td><input id="${prefix}_descpct" type="text" value="${cl.desc_pct?(formatarPct(cl.desc_pct)+'%'):''}" style="width:72px" placeholder="0%" oninput="pctOnInput(this);calcSubtotalRow('${prefix}',${pid})" onfocus="pctOnFocus(this)" onblur="pctOnBlur(this)"></td>
+    <td style="font-weight:600;text-align:center;white-space:nowrap;vertical-align:middle" id="${prefix}_sub">${cl._sub!=null&&cl._sub>0?fmt(cl._sub):'—'}</td>
+    <td style="vertical-align:middle"><button onmousedown="event.preventDefault()" onclick="removerRow(${pid},${i},'cl')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
   </tr>`;
 }
 
@@ -845,15 +852,15 @@ function renderServicoRow(pid,sv,i){
         <option value="">— Selecionar da lista —</option>
         ${opts}
       </select>
+      <input type="hidden" id="${prefix}_cod" value="${sv.cod||''}">
+      <input type="hidden" id="${prefix}_desc" value="${sv.desc||''}">
     </td>
-    <input type="hidden" id="${prefix}_cod" value="${sv.cod||''}">
-    <input type="hidden" id="${prefix}_desc" value="${sv.desc||''}">
     <td><select id="${prefix}_uni" onchange="savePecaFromDOM(${pid})" style="width:52px;padding:7px 2px;text-align:center"><option${sv.uni==='M'?' selected':''}>M</option><option${sv.uni==='PÇ'?' selected':''}>PÇ</option><option${sv.uni==='PAR'?' selected':''}>PAR</option><option${sv.uni==='JG'?' selected':''}>JG</option></select></td>
     <td><input id="${prefix}_qtd" type="text" value="${sv.qtd?formatarQtd(sv.qtd):''}" style="width:70px" placeholder="0,00" oninput="mascaraQtd(this);calcSubtotalRow('${prefix}',${pid})"></td>
     <td><input id="${prefix}_preco" type="text" value="${sv.preco?formatarMoeda(sv.preco):''}" style="width:110px" placeholder="R$ 0,00" oninput="mascaraMoeda(this);calcSubtotalRow('${prefix}',${pid})"></td>
-    <td><input id="${prefix}_descpct" type="number" min="0" max="100" value="${sv.desc_pct||0}" style="width:55px" placeholder="%" oninput="calcSubtotalRow('${prefix}',${pid})"></td>
-    <td style="font-weight:600;text-align:right;white-space:nowrap" id="${prefix}_sub">${sv._sub!=null&&sv._sub>0?fmt(sv._sub):'—'}</td>
-    <td><button onmousedown="event.preventDefault()" onclick="removerRow(${pid},${i},'sv')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
+    <td><input id="${prefix}_descpct" type="text" value="${sv.desc_pct?(formatarPct(sv.desc_pct)+'%'):''}" style="width:72px" placeholder="0%" oninput="pctOnInput(this);calcSubtotalRow('${prefix}',${pid})" onfocus="pctOnFocus(this)" onblur="pctOnBlur(this)"></td>
+    <td style="font-weight:600;text-align:center;white-space:nowrap;vertical-align:middle" id="${prefix}_sub">${sv._sub!=null&&sv._sub>0?fmt(sv._sub):'—'}</td>
+    <td style="vertical-align:middle"><button onmousedown="event.preventDefault()" onclick="removerRow(${pid},${i},'sv')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
   </tr>`;
 }
 
@@ -878,9 +885,9 @@ function renderProdutoRow(pid,pr,i,tipo){
     <td><select id="${prefix}_uni" onchange="savePecaFromDOM(${pid})" style="width:52px;padding:7px 2px;text-align:center"><option${pr.uni==='M'?' selected':''}>M</option><option${pr.uni==='PÇ'?' selected':''}>PÇ</option><option${pr.uni==='PAR'?' selected':''}>PAR</option><option${pr.uni==='JG'?' selected':''}>JG</option></select></td>
     <td><input id="${prefix}_qtd" type="text" value="${pr.qtd?formatarQtd(pr.qtd):''}" style="width:85px" placeholder="0,00" oninput="mascaraQtd(this);calcSubtotalRow('${prefix}',${pid})"></td>
     <td><input id="${prefix}_preco" type="text" value="${pr.preco?formatarMoeda(pr.preco):''}" style="width:110px" placeholder="R$ 0,00" oninput="mascaraMoeda(this);calcSubtotalRow('${prefix}',${pid})"></td>
-    <td><input id="${prefix}_descpct" type="text" value="${pr.desc_pct?(pr.desc_pct+'%'):''}" style="width:72px" placeholder="0%" oninput="mascaraPct(this);calcSubtotalRow('${prefix}',${pid})"></td>
-    <td style="font-weight:600;text-align:right;white-space:nowrap" id="${prefix}_sub">${pr._sub!=null&&pr._sub>0?fmt(pr._sub):'—'}</td>
-    <td><button onclick="removerRow(${pid},${i},'pr')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
+    <td><input id="${prefix}_descpct" type="text" value="${pr.desc_pct?(formatarPct(pr.desc_pct)+'%'):''}" style="width:72px" placeholder="0%" oninput="pctOnInput(this);calcSubtotalRow('${prefix}',${pid})" onfocus="pctOnFocus(this)" onblur="pctOnBlur(this)"></td>
+    <td style="font-weight:600;text-align:center;white-space:nowrap;vertical-align:middle" id="${prefix}_sub">${pr._sub!=null&&pr._sub>0?fmt(pr._sub):'—'}</td>
+    <td style="vertical-align:middle"><button onclick="removerRow(${pid},${i},'pr')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 6px" title="Excluir">×</button></td>
   </tr>`;
 }
 
@@ -897,78 +904,112 @@ function removerRow(pid, idx, tipo){
   renderPecas();
 }
 
+function atualizarHeaderPeca(pid){
+  const p = pecas.find(x=>x.id===pid);
+  if(!p) return;
+  const tipoEl  = document.getElementById(`hdr-tipo-${pid}`);
+  const localEl = document.getElementById(`hdr-local-${pid}`);
+  const totEl   = document.getElementById(`hdr-total-${pid}`);
+  if(tipoEl)  tipoEl.textContent  = p.tipo  ? '— '+p.tipo  : '';
+  if(localEl) localEl.textContent = p.local ? '· '+p.local : '';
+  if(totEl)   totEl.textContent   = p._total ? '· '+fmt(p._total) : '';
+}
+
+function togglePeca(pid){
+  const body = document.getElementById(`peca-body-${pid}`);
+  const btn  = document.getElementById(`toggle-btn-${pid}`);
+  if(!body) return;
+  const minimized = body.style.display==='none';
+  body.style.display = minimized ? '' : 'none';
+  btn.textContent   = minimized ? '▾' : '▸';
+  btn.title         = minimized ? 'Minimizar' : 'Expandir';
+}
+
 function removerProduto(pid,i){ removerRow(pid,i,'pr'); }
 
 function renderPecas(){
+  // salva estado de minimizado antes de re-renderizar
+  const minimizadas = new Set(
+    pecas.map(p=>p.id).filter(id=>{
+      const body=document.getElementById(`peca-body-${id}`);
+      return body && body.style.display==='none';
+    })
+  );
+
   const el=document.getElementById('lista-pecas');
   if(!pecas.length){el.innerHTML='<div class="card"><div class="empty">Clique em "Nova Peça" para começar.</div></div>';return}
   el.innerHTML=pecas.map((p,idx)=>`
   <div class="peca-card" id="pcard${p.id}">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <button onclick="togglePeca(${p.id})" id="toggle-btn-${p.id}" style="background:none;border:1px solid #ddd;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:14px;color:#666" title="Minimizar/Expandir">▾</button>
         <span class="section-badge">FICHA TÉCNICA</span>
-        <span style="font-size:13px;font-weight:700;color:#2c2c2a">Peça ${idx+1}</span>
+        <span style="font-size:22px;font-weight:700;color:#2c2c2a;text-transform:uppercase;margin-left:24px;letter-spacing:0.03em">Peça ${idx+1}</span>
+        <span id="hdr-tipo-${p.id}" style="font-size:13px;color:#555;font-weight:600;margin-left:8px">${p.tipo?'— '+p.tipo:''}</span>
+        <span id="hdr-local-${p.id}" style="font-size:13px;color:#888">${p.local?'· '+p.local:''}</span>
+        <span id="hdr-total-${p.id}" style="font-size:13px;font-weight:700;color:#0f6e56;margin-left:4px">${p._total?'· '+fmt(p._total):''}</span>
       </div>
       <button class="btn btn-red" onclick="_excluindo=true;removePeca(${p.id})" style="font-size:12px;padding:5px 12px">🗑️ Excluir Peça</button>
     </div>
+    <div id="peca-body-${p.id}">
 
     <div class="grid4" style="margin-bottom:10px">
-      <div class="field"><label>Tipo de Costura</label><select id="p${p.id}_tipo" onchange="savePecaFromDOM(${p.id})">${TIPOS_COSTURA.map(o=>`<option${o===p.tipo?' selected':''}>${o}</option>`).join('')}</select></div>
-      <div class="field"><label>Local do Ambiente</label><select id="p${p.id}_local" onchange="savePecaFromDOM(${p.id})">${LOCAIS.map(o=>`<option${o===p.local?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Tipo de Costura</label><select id="p${p.id}_tipo" onchange="savePecaFromDOM(${p.id})"><option value="">—</option>${TIPOS_COSTURA.map(o=>`<option${o===p.tipo?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Local do Ambiente</label><select id="p${p.id}_local" onchange="savePecaFromDOM(${p.id})"><option value="">—</option>${LOCAIS.map(o=>`<option${o===p.local?' selected':''}>${o}</option>`).join('')}</select></div>
       <div class="field"><label>Largura (m)</label><input id="p${p.id}_largura" type="number" step="0.01" value="${p.largura}" placeholder="ex: 2,00" oninput="savePecaFromDOM(${p.id})"></div>
       <div class="field"><label>Altura (m)</label><input id="p${p.id}_altura" type="number" step="0.01" value="${p.altura}" placeholder="ex: 1,40" oninput="savePecaFromDOM(${p.id})"></div>
     </div>
 
     <div class="grid3" style="margin-bottom:10px">
-      <div class="field"><label>Engate (do tecido)</label><select id="p${p.id}_engate" onchange="savePecaFromDOM(${p.id})">${ENGATES.map(o=>`<option${o===p.engate?' selected':''}>${o}</option>`).join('')}</select></div>
-      <div class="field"><label>Sustentação</label><select id="p${p.id}_sustentacao" onchange="savePecaFromDOM(${p.id})">${SUSTENTACOES.map(o=>`<option${o===p.sustentacao?' selected':''}>${o}</option>`).join('')}</select></div>
-      <div class="field"><label>Forro</label><select id="p${p.id}_forro" onchange="savePecaFromDOM(${p.id})">${FORROS.map(o=>`<option${o===p.forro?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Engate (do tecido)</label><select id="p${p.id}_engate" onchange="savePecaFromDOM(${p.id})"><option value="">—</option>${ENGATES.map(o=>`<option${o===p.engate?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Sustentação</label><select id="p${p.id}_sustentacao" onchange="savePecaFromDOM(${p.id})"><option value="">—</option>${SUSTENTACOES.map(o=>`<option${o===p.sustentacao?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>Forro</label><select id="p${p.id}_forro" onchange="savePecaFromDOM(${p.id})"><option value="">—</option>${FORROS.map(o=>`<option${o===p.forro?' selected':''}>${o}</option>`).join('')}</select></div>
     </div>
 
     <div style="background:#f9f8f5;border:1px solid #e8e7e0;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
       <div style="display:flex;flex-direction:column;min-width:100px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Prega</label>
-        <select id="p${p.id}_prega" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${PREGAS.map(o=>`<option${o===p.prega?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_prega" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${PREGAS.map(o=>`<option${o===p.prega?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Bainha</label>
-        <select id="p${p.id}_bainha" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${BAINHA_OPTS.map(o=>`<option${o===p.bainha?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_bainha" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${BAINHA_OPTS.map(o=>`<option${o===p.bainha?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:110px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Caimento</label>
-        <select id="p${p.id}_caimento" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${CAIMENTO_OPTS.map(o=>`<option${o===p.caimento?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_caimento" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 24px 4px 6px"><option value="">—</option>${CAIMENTO_OPTS.map(o=>`<option${o===p.caimento?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Folhas</label>
-        <select id="p${p.id}_folhas" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${FOLHAS_OPTS.map(o=>`<option${o===p.folhas?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_folhas" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 24px 4px 6px"><option value="">—</option>${FOLHAS_OPTS.map(o=>`<option${o===p.folhas?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Abertura</label>
-        <select id="p${p.id}_abertura" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${ABERTURA_OPTS.map(o=>`<option${o===p.abertura?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_abertura" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 24px 4px 6px"><option value="">—</option>${ABERTURA_OPTS.map(o=>`<option${o===p.abertura?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:90px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Montagem</label>
-        <select id="p${p.id}_montagem" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${MONTAGEM_OPTS.map(o=>`<option${o===p.montagem?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_montagem" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 24px 4px 6px"><option value="">—</option>${MONTAGEM_OPTS.map(o=>`<option${o===p.montagem?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Acima Jan.</label>
-        <select id="p${p.id}_acima_janela" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${JANELA_OPTS.map(o=>`<option${o===p.acima_janela?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_acima_janela" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${JANELA_OPTS.map(o=>`<option${o===p.acima_janela?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:80px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Lateral Jan.</label>
-        <select id="p${p.id}_lateral_janela" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${JANELA_OPTS.map(o=>`<option${o===p.lateral_janela?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_lateral_janela" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${JANELA_OPTS.map(o=>`<option${o===p.lateral_janela?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:70px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Tomas</label>
-        <select id="p${p.id}_tomas" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${SIM_NAO.map(o=>`<option${o===p.tomas?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_tomas" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${SIM_NAO.map(o=>`<option${o===p.tomas?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:70px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Bandô</label>
-        <select id="p${p.id}_bandô" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${SIM_NAO.map(o=>`<option${o===p.bandô?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_bandô" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${SIM_NAO.map(o=>`<option${o===p.bandô?' selected':''}>${o}</option>`).join('')}</select>
       </div>
       <div style="display:flex;flex-direction:column;min-width:70px;flex:1">
         <label style="font-size:10px;color:#999;margin-bottom:2px;font-weight:600;text-transform:uppercase">Nervura</label>
-        <select id="p${p.id}_nervura" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px">${SIM_NAO.map(o=>`<option${o===p.nervura?' selected':''}>${o}</option>`).join('')}</select>
+        <select id="p${p.id}_nervura" onchange="savePecaFromDOM(${p.id})" style="font-size:12px;padding:4px 6px"><option value="">—</option>${SIM_NAO.map(o=>`<option${o===p.nervura?' selected':''}>${o}</option>`).join('')}</select>
       </div>
     </div>
 
@@ -980,7 +1021,7 @@ function renderPecas(){
     <div class="section-badge">PRODUTOS — COSTURA</div>
     <div style="overflow-x:auto;margin-bottom:8px">
     <table class="lista" style="min-width:600px">
-      <thead><tr><th>Cód</th><th>Descrição</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th>Subtotal</th><th></th></tr></thead>
+      <thead><tr><th>Cód</th><th>Descrição</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th style="text-align:center">Subtotal</th><th></th></tr></thead>
       <tbody>${p.produtos.map((pr,i)=>renderProdutoRow(p.id,pr,i,'pr')).join('')}</tbody>
     </table>
     </div>
@@ -989,7 +1030,7 @@ function renderPecas(){
     <div style="margin-top:14px"><div class="section-badge">SERVIÇO — COSTURA</div></div>
     <div style="overflow-x:auto;margin:8px 0">
     <table class="lista" style="min-width:700px">
-      <thead><tr><th>Serviço da Lista</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th>Subtotal</th><th></th></tr></thead>
+      <thead><tr><th>Serviço da Lista</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th style="text-align:center">Subtotal</th><th></th></tr></thead>
       <tbody>${p.servicos.map((sv,i)=>renderServicoRow(p.id,sv,i)).join('')}</tbody>
     </table>
     </div>
@@ -998,7 +1039,7 @@ function renderPecas(){
     <div style="margin-top:14px"><div class="section-badge" style="background:#185fa5">SERVIÇO — COLOCAÇÃO</div></div>
     <div style="overflow-x:auto;margin:8px 0">
     <table class="lista" style="min-width:700px">
-      <thead><tr><th>Serviço da Lista</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th>Subtotal</th><th></th></tr></thead>
+      <thead><tr><th>Serviço da Lista</th><th>Uni</th><th>Qtd</th><th>R$ Uni</th><th>Desc%</th><th style="text-align:center">Subtotal</th><th></th></tr></thead>
       <tbody>${(p.colocacoes||[]).map((cl,i)=>renderColocacaoRow(p.id,cl,i)).join('')}</tbody>
     </table>
     </div>
@@ -1036,8 +1077,21 @@ function renderPecas(){
       <span style="font-size:13px;color:#666">Total da Peça:</span>
       <span style="font-size:18px;font-weight:700;color:#0f6e56" id="p${p.id}_total">${p._total!=null?fmt(p._total):'—'}</span>
     </div>
+    </div><!-- /peca-body -->
   </div>`).join('');
-  pecas.forEach(p=>{calcPeca(p.id);initCanvas(p.id);const obsEl=document.getElementById(`p${p.id}_obs`);if(obsEl) autoGrowObs(obsEl);});
+  pecas.forEach(p=>{
+    calcPeca(p.id);
+    initCanvas(p.id);
+    const obsEl=document.getElementById(`p${p.id}_obs`);
+    if(obsEl) autoGrowObs(obsEl);
+    // restaura estado minimizado
+    if(minimizadas.has(p.id)){
+      const body=document.getElementById(`peca-body-${p.id}`);
+      const btn=document.getElementById(`toggle-btn-${p.id}`);
+      if(body) body.style.display='none';
+      if(btn){ btn.textContent='▸'; btn.title='Expandir'; }
+    }
+  });
 }
 
 // ──────────────────────────────────────────────
@@ -1214,7 +1268,7 @@ function renderImpressao(){
   const colData=g('col-data'), colHora=g('col-hora'), colVend=g('col-vend');
   const colEnd=g('col-end'), colNum=g('col-num'), colComp=g('col-comp');
   const colApto=g('col-apto'), colBairro=g('col-bairro'), colEdif=g('col-edif');
-  const colCidade=g('col-cidade'), colCep=g('col-cep'), colProx=g('col-prox');
+  const colCidade=g('col-cidade'), colEstado=g('col-estado'), colCep=g('col-cep'), colProx=g('col-prox');
   const colCel=g('col-cel'), colTel=g('col-tel');
   const resp=g('resp-nome'), respTel=g('resp-tel'), porteiro=g('porteiro'), horEdif=g('horario-entrega');
   const qtdPecas=g('qtd-pecas'), pgtoForma=g('pgto-forma'), pgtoEnt=g('pgto-entrada'), obs=g('cli-obs');
@@ -1270,7 +1324,8 @@ function renderImpressao(){
           ${linha('Apto',colApto)}
           ${linha('Bairro',colBairro)}
           ${linha('Edifício',colEdif)}
-          ${linha('Cidade',colCidade+(colCep?' — CEP '+colCep:''))}
+          ${linha('Cidade',colCidade+(colEstado?' — '+colEstado:''))}
+          ${linha('CEP',colCep)}
           ${linha('Proximidade',colProx)}
           ${linha('Cel. Cliente',colCel)}
           ${linha('Tel. Cliente',colTel)}
@@ -1355,10 +1410,11 @@ function renderImpressao(){
       </div>
     </div>
 
-    ${(p.produtos&&p.produtos.some(pr=>pr.desc))||(p.servicos&&p.servicos.some(sv=>sv.desc))?`
+    ${(p.produtos&&p.produtos.some(pr=>pr.desc))||(p.servicos&&p.servicos.some(sv=>sv.desc))||(p.colocacoes&&p.colocacoes.some(cl=>cl.desc))?`
     <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">PRODUTOS E SERVIÇOS</div>
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="background:#f5f4f0">
+        <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Cód</th>
         <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Descrição</th>
         <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Uni</th>
         <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Qtd</th>
@@ -1367,8 +1423,9 @@ function renderImpressao(){
         <th style="padding:6px 8px;text-align:right;font-weight:600;color:#666">Subtotal</th>
       </tr></thead>
       <tbody>
-        ${[...p.produtos.filter(pr=>pr.desc),...p.servicos.filter(sv=>sv.desc)].map(it=>`
+        ${[...p.produtos.filter(pr=>pr.desc),...p.servicos.filter(sv=>sv.desc),...(p.colocacoes||[]).filter(cl=>cl.desc)].map(it=>`
         <tr style="border-bottom:1px solid #f5f4f0">
+          <td style="padding:5px 8px;color:#888;white-space:nowrap">${it.cod?String(it.cod).replace(/(\d{3})(\d{3})/,'$1.$2'):'—'}</td>
           <td style="padding:5px 8px">${it.desc}</td>
           <td style="padding:5px 8px;text-align:center">${it.uni||'M'}</td>
           <td style="padding:5px 8px;text-align:center">${it.qtd||'—'}</td>
@@ -1466,8 +1523,18 @@ function renderImpressao(){
 // ──────────────────────────────────────────────
 // FICHA TÉCNICA
 // ──────────────────────────────────────────────
+function abreviarNome(nome){
+  if(!nome||nome==='—') return nome;
+  const partes = nome.trim().split(/\s+/);
+  if(partes.length<=1) return nome;
+  const primeiro = partes[0];
+  const sobrenomes = partes.slice(1).map(p=>p.charAt(0).toUpperCase()+'.').join(' ');
+  return primeiro+' '+sobrenomes;
+}
+
 function renderFichaTec(){
-  const nome=g('cli-nome')||'—';
+  const nomeCompleto=g('cli-nome')||'—';
+  const nome=abreviarNome(nomeCompleto);
   const colVend=g('col-vend');
   const colData=g('col-data');
   const colHora=g('col-hora');
@@ -1736,6 +1803,29 @@ function calcSubtotalRow(prefix, pid){
   savePecaFromDOM(pid);
 }
 
+function formatarPct(v){
+  if(v===null||v===undefined||v==='') return '';
+  const n = typeof v==='number' ? v : parseFloat(String(v).replace(',','.'));
+  if(isNaN(n)) return '';
+  return Number.isInteger(n) ? n.toString() : n.toFixed(2).replace('.',',');
+}
+
+function pctOnInput(el){
+  // só limpa caracteres inválidos durante a digitação, sem mexer no cursor
+  let v = el.value.replace(/[^0-9,]/g,'');
+  const partes=v.split(',');
+  if(partes.length>2) v=partes[0]+','+partes.slice(1).join('');
+  el.value=v;
+}
+
+function pctOnFocus(el){
+  el.value = el.value.replace('%','');
+}
+
+function pctOnBlur(el){
+  if(el.value) el.value = el.value.replace('%','') + '%';
+}
+
 function mascaraPct(el){
   let v=el.value.replace('%','').replace(/[^0-9,\.]/g,'');
   if(v) el.value=v+'%';
@@ -1931,6 +2021,8 @@ renderPecas();
 // ──────────────────────────────────────────────
 // FIREBASE
 // ──────────────────────────────────────────────
+const isLocalMode = (location.protocol === 'file:');
+
 const firebaseConfig = {
   apiKey: "AIzaSyCRrLpRoskBNFysNjbzGeMoZsWJZs1bwHI",
   authDomain: "nandi-cortinas.firebaseapp.com",
@@ -1939,12 +2031,87 @@ const firebaseConfig = {
   messagingSenderId: "836738287862",
   appId: "1:836738287862:web:e08ef215da1a535413c4d7"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth, db;
+if(!isLocalMode){
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+} else {
+  // ── MOCK DE BANCO LOCAL (localStorage) — simula a API do Firestore usada no código ──
+  function _localDB(){ return JSON.parse(localStorage.getItem('cv2_clientes_teste')||'{}'); }
+  function _saveLocalDB(obj){ localStorage.setItem('cv2_clientes_teste', JSON.stringify(obj)); }
+  db = {
+    collection(name){
+      const filters=[];
+      const self={
+        doc(id){
+          return {
+            async get(){
+              const all=_localDB();
+              const data=all[id];
+              return { exists: !!data, data: ()=>data, id };
+            },
+            async update(patch){
+              const all=_localDB();
+              all[id] = {...(all[id]||{}), ...patch};
+              _saveLocalDB(all);
+            },
+            async delete(){
+              const all=_localDB();
+              delete all[id];
+              _saveLocalDB(all);
+            }
+          };
+        },
+        async add(data){
+          const all=_localDB();
+          const id='local_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+          all[id]=data;
+          _saveLocalDB(all);
+          return { id };
+        },
+        orderBy(){ return self; },
+        where(field,op,val){
+          filters.push({field,val});
+          return self;
+        },
+        async get(){
+          const all=_localDB();
+          let docs=Object.entries(all).map(([id,data])=>({id,data:()=>data}));
+          filters.forEach(f=>{
+            docs=docs.filter(d=>{
+              const obj=d.data();
+              const parts=f.field.split('.');
+              let v=obj;
+              for(const p of parts) v=v?.[p];
+              return v===f.val;
+            });
+          });
+          docs.sort((a,b)=>(b.data().updatedAt||'').localeCompare(a.data().updatedAt||''));
+          return { docs, empty: docs.length===0 };
+        }
+      };
+      return self;
+    }
+  };
+}
 
 let currentUser = null;
 let userDoc = null; // {role, nome, vendedoraNome}
+
+function toggleSenha(){
+  const input = document.getElementById('login-senha');
+  const btn = document.getElementById('toggle-senha-btn');
+  if(input.type==='password'){
+    input.type='text';
+    btn.textContent='🙈';
+    btn.title='Ocultar senha';
+  } else {
+    input.type='password';
+    btn.textContent='👁️';
+    btn.title='Mostrar senha';
+  }
+}
 
 // LOGIN
 async function fazerLogin(){
@@ -1967,46 +2134,66 @@ async function fazerLogin(){
 }
 
 function fazerLogout(){
+  if(isLocalMode){ alert('Modo teste local — não há logout, é só fechar o arquivo.'); return; }
   if(!confirm('Deseja sair do sistema?')) return;
   auth.signOut();
 }
 
-// OBSERVER DE AUTENTICAÇÃO
-auth.onAuthStateChanged(async user => {
-  if(user){
-    currentUser = user;
-    // Carrega perfil do Firestore
-    const snap = await db.collection('usuarios').doc(user.email).get();
-    if(!snap.exists){ auth.signOut(); alert('Usuário sem permissão.'); return; }
-    userDoc = snap.data();
+function entrarModoLocal(){
+  currentUser = {email:'teste-local@offline'};
+  userDoc = {role:'admin', nome:'Teste Local (offline)'};
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('user-bar').style.display='flex';
+  document.getElementById('user-bar').style.background='#854f0b';
+  document.getElementById('user-nome').textContent = userDoc.nome;
+  document.getElementById('user-role-badge').textContent = '🧪 MODO TESTE — dados não vão para a nuvem';
+  renderClientes();
+  renderHistorico();
+  atualizarBarraCliente();
+}
 
-    // Mostra sistema
-    document.getElementById('login-overlay').classList.add('hidden');
-    document.getElementById('user-bar').style.display='flex';
-    document.getElementById('user-nome').textContent = userDoc.nome;
-    document.getElementById('user-role-badge').textContent = userDoc.role==='admin' ? '👑 Admin' : '🏷️ Vendedora';
+if(isLocalMode){
+  // Pula login automaticamente quando o arquivo é aberto direto (file://)
+  document.addEventListener('DOMContentLoaded', entrarModoLocal);
+  if(document.readyState!=='loading') entrarModoLocal();
+} else {
+  // OBSERVER DE AUTENTICAÇÃO (modo online)
+  auth.onAuthStateChanged(async user => {
+    if(user){
+      currentUser = user;
+      // Carrega perfil do Firestore
+      const snap = await db.collection('usuarios').doc(user.email).get();
+      if(!snap.exists){ auth.signOut(); alert('Usuário sem permissão.'); return; }
+      userDoc = snap.data();
 
-    // Se vendedora, pré-seleciona e trava o campo vendedora
-    if(userDoc.role==='vendedora'){
-      const sel = document.getElementById('col-vend');
-      if(sel){
-        sel.value = userDoc.vendedoraNome;
-        sel.disabled = true;
+      // Mostra sistema
+      document.getElementById('login-overlay').classList.add('hidden');
+      document.getElementById('user-bar').style.display='flex';
+      document.getElementById('user-nome').textContent = userDoc.nome;
+      document.getElementById('user-role-badge').textContent = userDoc.role==='admin' ? '👑 Admin' : '🏷️ Vendedora';
+
+      // Se vendedora, pré-seleciona e trava o campo vendedora
+      if(userDoc.role==='vendedora'){
+        const sel = document.getElementById('col-vend');
+        if(sel){
+          sel.value = userDoc.vendedoraNome;
+          sel.disabled = true;
+        }
       }
-    }
 
-    renderClientes();
-    renderHistorico();
-    atualizarBarraCliente();
-  } else {
-    currentUser = null;
-    userDoc = null;
-    document.getElementById('login-overlay').classList.remove('hidden');
-    document.getElementById('user-bar').style.display='none';
-    document.getElementById('btn-login').textContent='Entrar';
-    document.getElementById('btn-login').disabled=false;
-  }
-});
+      renderClientes();
+      renderHistorico();
+      atualizarBarraCliente();
+    } else {
+      currentUser = null;
+      userDoc = null;
+      document.getElementById('login-overlay').classList.remove('hidden');
+      document.getElementById('user-bar').style.display='none';
+      document.getElementById('btn-login').textContent='Entrar';
+      document.getElementById('btn-login').disabled=false;
+    }
+  });
+}
 
 // ──────────────────────────────────────────────
 // BANCO DE DADOS — FIRESTORE
