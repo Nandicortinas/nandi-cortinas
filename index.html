@@ -175,7 +175,7 @@ table.lista tr:hover td{background:#fafaf8}
         <div class="field"><label>Cód. Cliente Sisgem</label><input id="cod-cli" placeholder="ex: 1.000" oninput="mascaraCodCli(this)"></div>
         <div class="field">
           <label>Cód. Cliente <span style="font-size:10px;color:#aaa;font-weight:400">(gerado automaticamente)</span></label>
-          <input id="cod-cli-auto" placeholder="—" readonly style="background:#f5f4f0;color:#2c2c2a;font-weight:700;cursor:default">
+          <input id="cod-cli-auto" placeholder="gerado ao salvar" readonly style="background:#f5f4f0;color:#2c2c2a;font-weight:700;cursor:default">
         </div>
         <div class="field"><label>Nome do Cliente</label><input id="cli-nome" placeholder="Nome completo" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
         <div class="field">
@@ -207,9 +207,9 @@ table.lista tr:hover td{background:#fafaf8}
           <div class="field"><label>Endereço</label><input id="cli-end" placeholder="Rua / Avenida"></div>
           <div class="field"><label>Nº</label><input id="cli-num" placeholder="123"></div>
         </div>
-        <div class="field"><label>Complemento</label><input id="cli-comp" placeholder="Apto, bloco, sala..."></div>
-        <div class="field"><label>Complemento 2</label><input id="cli-comp2" placeholder="Próximo..."></div>
-        <div class="field"><label>Edifício</label><input id="cli-edif" placeholder="Nome do edifício"></div>
+        <div class="field"><label>Complemento</label><input id="cli-comp" placeholder="Apto, bloco, sala..." style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="field"><label>Complemento 2</label><input id="cli-comp2" placeholder="Próximo..." style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="field"><label>Edifício</label><input id="cli-edif" placeholder="Nome do edifício" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
         <div class="field"><label>Bairro</label><input id="cli-bairro" placeholder="Bairro"></div>
         <div class="grid3">
           <div class="field" style="grid-column:1/3"><label>Cidade</label><input id="cli-cidade" placeholder="Cidade" value="Tubarão"></div>
@@ -255,9 +255,9 @@ table.lista tr:hover td{background:#fafaf8}
     <div>
       <div class="card">
         <div class="card-title">Responsável / Portaria</div>
-        <div class="field"><label>Responsável pelo Recebimento</label><input id="resp-nome" placeholder="Nome do responsável"></div>
+        <div class="field"><label>Responsável pelo Recebimento</label><input id="resp-nome" placeholder="Nome do responsável" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
         <div class="field"><label>Telefone do Responsável</label><input id="resp-tel" placeholder="(48) 9 9931-9845" oninput="mascaraTel(this)" maxlength="16"></div>
-        <div class="field"><label>Nome do Porteiro</label><input id="porteiro" placeholder="Nome do porteiro"></div>
+        <div class="field"><label>Nome do Porteiro</label><input id="porteiro" placeholder="Nome do porteiro" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
         <div class="field"><label>Horário Permitido de Entrega no Edifício</label><input id="horario-entrega" placeholder="ex: 08h às 18h"></div>
         <div class="field"><label>Quantidade de Peças</label><input id="qtd-pecas" type="number" min="1" value="1"></div>
       </div>
@@ -644,7 +644,10 @@ function showTab(id,btn){
   if(id==='impressao') renderImpressao();
   if(id==='fichatec') renderFichaTec();
   if(id==='clientes') renderClientes();
-  if(id==='pecas') pecas.forEach(p=>{const el=document.getElementById('p'+p.id+'_obs'); if(el) autoGrowObs(el);});
+  if(id==='pecas') pecas.forEach(p=>{
+    const el=document.getElementById('p'+p.id+'_obs');
+    if(el){ autoGrowObs(el); atualizarLinhasObs(el); }
+  });
 }
 
 // ──────────────────────────────────────────────
@@ -914,9 +917,9 @@ function atualizarHeaderPeca(pid){
   const tipoEl  = document.getElementById(`hdr-tipo-${pid}`);
   const localEl = document.getElementById(`hdr-local-${pid}`);
   const totEl   = document.getElementById(`hdr-total-${pid}`);
-  if(tipoEl)  tipoEl.textContent  = p.tipo  ? '— '+p.tipo  : '';
-  if(localEl) localEl.textContent = p.local ? '· '+p.local : '';
-  if(totEl)   totEl.textContent   = p._total ? '· '+fmt(p._total) : '';
+  if(tipoEl)  tipoEl.textContent  = '— '+(p.tipo||'—');
+  if(localEl) localEl.textContent = '· '+(p.local||'—');
+  if(totEl)   totEl.textContent   = '· '+fmt(p._total||0);
 }
 
 function togglePeca(pid){
@@ -949,9 +952,9 @@ function renderPecas(){
         <button onclick="togglePeca(${p.id})" id="toggle-btn-${p.id}" style="background:none;border:1px solid #ddd;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:14px;color:#666" title="Minimizar/Expandir">▾</button>
         <span class="section-badge">FICHA TÉCNICA</span>
         <span style="font-size:22px;font-weight:700;color:#2c2c2a;text-transform:uppercase;margin-left:24px;letter-spacing:0.03em">Peça ${idx+1}</span>
-        <span id="hdr-tipo-${p.id}" style="font-size:13px;color:#555;font-weight:600;margin-left:8px">${p.tipo?'— '+p.tipo:''}</span>
-        <span id="hdr-local-${p.id}" style="font-size:13px;color:#888">${p.local?'· '+p.local:''}</span>
-        <span id="hdr-total-${p.id}" style="font-size:13px;font-weight:700;color:#0f6e56;margin-left:4px">${p._total?'· '+fmt(p._total):''}</span>
+        <span id="hdr-tipo-${p.id}" style="font-size:13px;color:#555;font-weight:600;margin-left:8px">— ${p.tipo||'—'}</span>
+        <span id="hdr-local-${p.id}" style="font-size:13px;color:#888">· ${p.local||'—'}</span>
+        <span id="hdr-total-${p.id}" style="font-size:13px;font-weight:700;color:#0f6e56;margin-left:4px">· ${fmt(p._total||0)}</span>
       </div>
       <button class="btn btn-red" onclick="_excluindo=true;removePeca(${p.id})" style="font-size:12px;padding:5px 12px">🗑️ Excluir Peça</button>
     </div>
@@ -1019,7 +1022,14 @@ function renderPecas(){
 
     <div style="margin-bottom:12px">
       <label style="font-size:11px;color:#888;font-weight:600;display:block;margin-bottom:4px">Observações</label>
-      <textarea id="p${p.id}_obs" rows="5" placeholder="Observações sobre a peça..." oninput="autoGrowObs(this);savePecaFromDOM(${p.id})" style="font-size:13px;padding:8px 10px;resize:none;overflow-y:hidden;line-height:1.5;font-family:inherit">${p.obs||''}</textarea>
+      <div style="position:relative;border:1px solid #ddd;border-radius:6px;overflow:hidden;background:#fff">
+        <div style="position:absolute;left:0;top:0;width:26px;z-index:2;pointer-events:none;padding-top:8px">
+          ${Array.from({length:10},(_,i)=>`<div style="height:24px;line-height:24px;text-align:right;padding-right:5px;font-size:9px;color:#ddd;user-select:none">${i+1}</div>`).join('')}
+        </div>
+        <textarea id="p${p.id}_obs" placeholder="" maxlength="800" oninput="autoGrowObs(this);savePecaFromDOM(${p.id})"
+          style="display:block;width:100%;font-size:13px;line-height:24px;padding:8px 12px 8px 30px;resize:none;border:none;outline:none;font-family:inherit;color:#1a1a1a;background-image:linear-gradient(transparent 23px,rgba(0,0,0,0.07) 23px,rgba(0,0,0,0.07) 24px,transparent 24px);background-size:100% 24px;background-position:0 0;background-repeat:repeat-y;background-origin:content-box;background-clip:content-box"
+        >${p.obs||''}</textarea>
+      </div>
     </div>
 
     <div class="section-badge">PRODUTOS — COSTURA</div>
@@ -1087,7 +1097,7 @@ function renderPecas(){
     calcPeca(p.id);
     initCanvas(p.id);
     const obsEl=document.getElementById(`p${p.id}_obs`);
-    if(obsEl) autoGrowObs(obsEl);
+    if(obsEl){ autoGrowObs(obsEl); atualizarLinhasObs(obsEl); }
     // restaura estado minimizado
     if(minimizadas.has(p.id)){
       const body=document.getElementById(`peca-body-${p.id}`);
@@ -1101,15 +1111,41 @@ function renderPecas(){
 // ──────────────────────────────────────────────
 // CANVAS DESENHO
 // ──────────────────────────────────────────────
+function atualizarLinhasObs(el){
+  const pid = el.id.replace('p','').replace('_obs','');
+  const numsEl = document.getElementById('p'+pid+'_obs_nums');
+  if(!numsEl) return;
+  const lineH = 1.75 * parseFloat(getComputedStyle(el).fontSize||'13');
+  const padT  = 8;
+  const totalH = Math.max(el.scrollHeight, el.offsetHeight);
+  const numLines = Math.max(5, Math.ceil((totalH - padT) / lineH));
+
+  // gera números + linhas
+  numsEl.innerHTML = Array.from({length:numLines},(_,i)=>`
+    <div style="height:${lineH}px;display:flex;align-items:flex-end;position:relative">
+      <span style="font-size:9px;color:#ccc;min-width:18px;text-align:right;padding-bottom:2px;user-select:none">${i+1}</span>
+      <div style="position:absolute;left:22px;right:-${el.offsetWidth-28}px;bottom:0;height:1px;background:rgba(0,0,0,0.07)"></div>
+    </div>`
+  ).join('');
+  numsEl.style.width = (el.offsetWidth - 12)+'px';
+}
+
 function autoGrowObs(el){
-  const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 19.5;
-  const minHeight = lineHeight*5 + 18;
-  const maxHeight = lineHeight*10 + 18;
-  el.style.height = 'auto';
-  const needed = el.scrollHeight || minHeight; // scrollHeight é 0 se a aba estiver oculta
-  const target = Math.max(needed, minHeight);
-  el.style.height = Math.min(target, maxHeight) + 'px';
-  el.style.overflowY = target > maxHeight ? 'auto' : 'hidden';
+  const minH = 136; // 5 linhas × 24px + 16px padding
+  const maxH = 256; // 10 linhas × 24px + 16px padding
+  // 1) força altura mínima para medir corretamente
+  el.style.overflow = 'hidden';
+  el.style.height = minH + 'px';
+  // 2) lê altura real do conteúdo (scrollHeight sempre retorna o total)
+  const full = el.scrollHeight;
+  // 3) aplica cap rígido
+  if(full <= maxH){
+    el.style.height = Math.max(full, minH) + 'px';
+    el.style.overflow = 'hidden';
+  } else {
+    el.style.height = maxH + 'px';
+    el.style.overflow = 'auto';
+  }
 }
 
 function initCanvas(pid){
@@ -1432,7 +1468,7 @@ function renderImpressao(){
           <td style="padding:5px 8px;color:#888;white-space:nowrap">${it.cod?String(it.cod).replace(/(\d{3})(\d{3})/,'$1.$2'):'—'}</td>
           <td style="padding:5px 8px">${it.desc}</td>
           <td style="padding:5px 8px;text-align:center">${it.uni||'M'}</td>
-          <td style="padding:5px 8px;text-align:center">${it.qtd||'—'}</td>
+          <td style="padding:5px 8px;text-align:center">${it.qtd?formatarQtd(it.qtd):'—'}</td>
           <td style="padding:5px 8px;text-align:right">${it.preco?fmt(it.preco):'—'}</td>
           <td style="padding:5px 8px;text-align:right">${it.desc_pct||0}%</td>
           <td style="padding:5px 8px;text-align:right;font-weight:600">${it._sub!=null?fmt(it._sub):'—'}</td>
@@ -1553,17 +1589,16 @@ function renderFichaTec(){
     return;
   }
 
-  const pages=pecas.map((p,idx)=>`
+  const headerPage = `
   <div class="print-page" style="font-family:'Segoe UI',Arial,sans-serif">
-
     <div style="display:flex;justify-content:space-between;align-items:start;border-bottom:3px solid #2c2c2a;padding-bottom:10px;margin-bottom:14px">
       <div>
         <div style="font-size:17px;font-weight:700;color:#2c2c2a">🪟 FICHA TÉCNICA DE COSTURA E COLOCAÇÃO</div>
         <div style="font-size:12px;color:#666;margin-top:2px">Nandi Cortinas & Decor · Tubarão/SC · (48) 3622-0008</div>
       </div>
       <div style="text-align:right;font-size:12px;color:#666;line-height:1.8">
-        <div>Ficha <b>${idx+1}</b> de <b>${pecas.length}</b></div>
         <div>Data: <b>${hoje}</b></div>
+        <div>Total de Peças: <b>${pecas.length}</b></div>
         ${colData?`<div>Colocação: <b>${new Date(colData+'T00:00').toLocaleDateString('pt-BR')}</b>${colHora?' às <b>'+colHora+'</b>':''}</div>`:''}
       </div>
     </div>
@@ -1583,8 +1618,23 @@ function renderFichaTec(){
           ${colComp?linha('Complemento',colComp):''}
           ${colComp2?linha('Ref.',colComp2):''}
           ${linha('Bairro / Edifício',colBairro+(colEdif?' — '+colEdif:''))}
-          ${linha('Cidade / CEP',colCidade+(colEstado?' — '+colEstado:'')+(colCep?' · CEP '+colCep:''))}
+          ${linha('Cidade / UF',colCidade+(colEstado?' — '+colEstado:'')+(colCep?' · CEP '+colCep:''))}
         </table>
+      </div>
+    </div>
+  </div>`;
+
+  const pages=pecas.map((p,idx)=>`
+  <div class="print-page" style="font-family:'Segoe UI',Arial,sans-serif">
+
+    <div style="display:flex;justify-content:space-between;align-items:start;border-bottom:2px solid #2c2c2a;padding-bottom:8px;margin-bottom:12px">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#2c2c2a">🪟 FICHA TÉCNICA — PEÇA ${idx+1}</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Nandi Cortinas & Decor · Tubarão/SC</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666;line-height:1.8">
+        <div>Ficha <b>${idx+1}</b> de <b>${pecas.length}</b></div>
+        <div>Data: <b>${hoje}</b></div>
       </div>
     </div>
 
@@ -1621,15 +1671,6 @@ function renderFichaTec(){
           ${p.obs?linha('Observações',p.obs):''}
         </table>
 
-        ${p.servicos&&p.servicos.some(sv=>sv.desc)?`
-        <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px;margin-top:14px">SERVIÇOS DE COSTURA</div>
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          ${p.servicos.filter(sv=>sv.desc).map(sv=>`
-          <tr style="border-bottom:1px solid #f5f4f0">
-            <td style="padding:4px 0;color:#333">${sv.desc}</td>
-            <td style="padding:4px 0;text-align:right;color:#888;white-space:nowrap">${sv.qtd||'—'} ${sv.uni}</td>
-          </tr>`).join('')}
-        </table>`:''}
       </div>
     </div>
 
@@ -1638,17 +1679,50 @@ function renderFichaTec(){
       <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">PRODUTOS</div>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead><tr style="background:#f5f4f0">
-          <th style="padding:6px 8px;text-align:left">Descrição</th>
-          <th style="padding:6px 8px;text-align:center">Uni</th>
-          <th style="padding:6px 8px;text-align:center">Qtd</th>
+          <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Cód</th>
+          <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Descrição</th>
+          <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Uni</th>
+          <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Qtd</th>
         </tr></thead>
         <tbody>
           ${p.produtos.filter(pr=>pr.desc).map(pr=>`
           <tr style="border-bottom:1px solid #f5f4f0">
+            <td style="padding:5px 8px;color:#888;white-space:nowrap">${pr.cod?String(pr.cod).replace(/(\d{3})(\d{3})/,'$1.$2'):'—'}</td>
             <td style="padding:5px 8px">${pr.desc}</td>
-            <td style="padding:5px 8px;text-align:center">${pr.uni}</td>
-            <td style="padding:5px 8px;text-align:center">${pr.qtd||'—'}</td>
+            <td style="padding:5px 8px;text-align:center">${pr.uni||'M'}</td>
+            <td style="padding:5px 8px;text-align:center">${pr.qtd?formatarQtd(pr.qtd):'—'}</td>
           </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`:''}
+
+    ${p.servicos&&p.servicos.some(sv=>sv.desc)?`
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px">SERVIÇO — COSTURA</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:#f5f4f0">
+          <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Cód</th>
+          <th style="padding:6px 8px;text-align:left;font-weight:600;color:#666">Descrição</th>
+          <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Uni</th>
+          <th style="padding:6px 8px;text-align:center;font-weight:600;color:#666">Qtd</th>
+          <th style="padding:6px 8px;text-align:right;font-weight:600;color:#666">R$ Uni</th>
+          <th style="padding:6px 8px;text-align:right;font-weight:600;color:#666">Subtotal</th>
+        </tr></thead>
+        <tbody>
+          ${p.servicos.filter(sv=>sv.desc).map(sv=>{
+            const item = LISTA_COSTURA.find(c=>c.cod==sv.cod);
+            const precoCostura = item ? item.costura : sv.preco;
+            const qtdNum = parseQtd(sv.qtd);
+            const subtotalCostura = qtdNum && precoCostura ? qtdNum * precoCostura : sv._sub;
+            return `
+          <tr style="border-bottom:1px solid #f5f4f0">
+            <td style="padding:5px 8px;color:#888;white-space:nowrap">${sv.cod?String(sv.cod).replace(/(\d{3})(\d{3})/,'$1.$2'):'—'}</td>
+            <td style="padding:5px 8px">${sv.desc}</td>
+            <td style="padding:5px 8px;text-align:center">${sv.uni||'M'}</td>
+            <td style="padding:5px 8px;text-align:center">${sv.qtd?formatarQtd(sv.qtd):'—'}</td>
+            <td style="padding:5px 8px;text-align:right">${precoCostura?fmt(precoCostura):'—'}</td>
+            <td style="padding:5px 8px;text-align:right;font-weight:600">${subtotalCostura!=null?fmt(subtotalCostura):'—'}</td>
+          </tr>`;}).join('')}
         </tbody>
       </table>
     </div>`:''}
@@ -1667,7 +1741,7 @@ function renderFichaTec(){
     <div style="font-size:10px;color:#aaa;text-align:right;margin-top:10px">* Imagens meramente ilustrativas · Orçamento válido por 15 dias</div>
   </div>`).join('');
 
-  document.getElementById('area-fichatec').innerHTML=pages;
+  document.getElementById('area-fichatec').innerHTML=headerPage+pages;
 }
 
 // ──────────────────────────────────────────────
@@ -1784,15 +1858,13 @@ function formatarQtd(v){
 }
 
 function parseQtd(v){
-  if(!v && v !== 0) return 0;
-  // se já é número JS, retorna direto
+  if(v === null || v === undefined || v === '') return 0;
   if(typeof v === 'number') return v;
-  return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
-}
-
-function parseQtd(v){
-  if(!v) return 0;
-  return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
+  const s = String(v).trim();
+  // se parece com número decimal JS ("5.55", "1500.75") — ponto é decimal, não milhar
+  if(/^\d+\.\d+$/.test(s)) return parseFloat(s);
+  // formato brasileiro ("5,55" ou "1.500,75") — ponto é milhar, vírgula é decimal
+  return parseFloat(s.replace(/\./g,'').replace(',','.')) || 0;
 }
 
 function calcSubtotalRow(prefix, pid){
@@ -1861,27 +1933,27 @@ function mascaraCodProd(el){
 }
 
 async function gerarCodigoCli(){
+  const el = document.getElementById('cod-cli-auto');
+  if(!el) return;
   try {
     if(isLocalMode){
+      // modo local: escaneia clientes existentes para pegar o maior código
       const all = JSON.parse(localStorage.getItem('cv2_clientes_teste')||'{}');
       const codigos = Object.values(all)
-        .map(c=>parseInt((c.dados?.codCliAuto||'0').replace(/\D/g,'')))
-        .filter(n=>!isNaN(n)&&n>0);
+        .map(c=>parseInt((c.dados?.codCliAuto||'0').replace(/\D/g,'').replace('.',''))||0)
+        .filter(n=>n>0);
       const proximo = codigos.length ? Math.max(...codigos)+1 : 1;
-      const el = document.getElementById('cod-cli-auto');
-      if(el) el.value = proximo.toLocaleString('pt-BR');
+      el.value = proximo.toLocaleString('pt-BR');
     } else {
+      // modo online: transação atômica no Firestore
       const ref = db.collection('config').doc('contador');
-      const snap = await ref.get();
-      let proximo = 1;
-      if(snap.exists){
-        proximo = (snap.data().ultimoCodCli||0)+1;
-        await ref.update({ultimoCodCli: proximo});
-      } else {
-        await ref.set({ultimoCodCli: 1});
-      }
-      const el = document.getElementById('cod-cli-auto');
-      if(el) el.value = proximo.toLocaleString('pt-BR');
+      let proximo;
+      await db.runTransaction(async transaction => {
+        const snap = await transaction.get(ref);
+        proximo = snap.exists ? (snap.data().ultimoCodCli||0)+1 : 1;
+        transaction.set(ref, {ultimoCodCli: proximo}, {merge: true});
+      });
+      el.value = proximo.toLocaleString('pt-BR');
     }
   } catch(e){
     console.error('Erro ao gerar código:', e);
@@ -2228,6 +2300,7 @@ if(isLocalMode){
 // BANCO DE DADOS — FIRESTORE
 // ──────────────────────────────────────────────
 let clienteAtualId = null;
+let orcAtualIdx = null; // índice do orçamento aberto atualmente
 let clientesCache = []; // cache local para performance
 
 function coletarDadosCliente(){
@@ -2280,6 +2353,12 @@ async function salvarClienteAtual(){
   const vendedoraNome = userDoc.role==='admin' ? (g('col-vend')||'') : userDoc.vendedoraNome;
   const temPecas = pecas.length > 0;
 
+  // gera código automático apenas para clientes novos que ainda não têm código
+  if(!clienteAtualId && !dados.codCliAuto){
+    await gerarCodigoCli();
+    dados.codCliAuto = g('cod-cli-auto');
+  }
+
   try {
     if(clienteAtualId){
       const ref = db.collection('clientes').doc(clienteAtualId);
@@ -2295,10 +2374,9 @@ async function salvarClienteAtual(){
             total, pgto: dados.pgtoForma,
             vendedoraNome,
           };
-          if(cli._orcAtual!=null) orcamentos[cli._orcAtual]=orcamento;
-          else orcamentos.push(orcamento);
+          if(orcAtualIdx!=null){ orcamentos[orcAtualIdx]=orcamento; }
+          else { orcamentos.push(orcamento); orcAtualIdx=orcamentos.length-1; }
         }
-        // atualiza array de vendedoras para filtro
         const vendedoras = [...new Set(orcamentos.map(o=>o.vendedoraNome).filter(Boolean))];
         await ref.update({ dados, nome:dados.nome, updatedAt:new Date().toLocaleDateString('pt-BR'), orcamentos, vendedoras });
       }
@@ -2312,13 +2390,14 @@ async function salvarClienteAtual(){
           total, pgto: dados.pgtoForma,
           vendedoraNome,
         });
+        orcAtualIdx = 0;
       }
       const vendedoras = vendedoraNome ? [vendedoraNome] : [];
       const docData = {
         nome:dados.nome, dados, vendedoras,
         createdAt:new Date().toLocaleDateString('pt-BR'),
         updatedAt:new Date().toLocaleDateString('pt-BR'),
-        orcamentos, _orcAtual: temPecas ? 0 : null,
+        orcamentos,
       };
       const ref = await db.collection('clientes').add(docData);
       clienteAtualId = ref.id;
@@ -2332,23 +2411,39 @@ async function salvarClienteAtual(){
 }
 
 async function abrirCliente(cid, orcIdx){
-  const snap = await db.collection('clientes').doc(cid).get();
-  if(!snap.exists) return;
-  const cli = snap.data();
+  // usa cache local primeiro (já carregado pelo renderClientes)
+  let cli = clientesCache.find(c=>c.id===cid);
+  if(!cli){
+    const snap = await db.collection('clientes').doc(cid).get();
+    if(!snap.exists) return;
+    cli = {id:cid, ...snap.data()};
+  }
   clienteAtualId = cid;
   const idx = orcIdx!=null ? orcIdx : (cli.orcamentos.length-1);
-  await db.collection('clientes').doc(cid).update({_orcAtual:idx});
-  preencherDadosCliente(cli.dados);
+  orcAtualIdx = idx; // guarda índice em memória local
   const orc = cli.orcamentos[idx];
+
+  // carrega peças do orçamento selecionado
   pecas = orc ? JSON.parse(JSON.stringify(orc.pecas)) : [];
   savePecas();
+
+  // preenche dados do cliente
+  preencherDadosCliente(cli.dados);
+
+  // preenche vendedora do orçamento
+  const vendEl = document.getElementById('col-vend');
+  if(vendEl && orc?.vendedoraNome && userDoc.role==='admin'){
+    vendEl.value = orc.vendedoraNome;
+  }
+
   atualizarBarraCliente();
+
+  // vai direto para Fichas de Peças
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-identificacao').classList.add('active');
-  document.querySelector('[onclick="showTab(\'identificacao\',this)"]').classList.add('active');
+  document.getElementById('tab-pecas').classList.add('active');
+  document.querySelector('[onclick="showTab(\'pecas\',this)"]').classList.add('active');
   renderPecas();
-  alert(`Cliente "${cli.nome}" carregado — Orçamento ${idx+1} de ${cli.orcamentos.length}`);
 }
 
 async function editarCliente(cid){
@@ -2366,11 +2461,14 @@ async function editarCliente(cid){
 }
 
 async function novoOrcamentoCliente(cid){
-  const snap = await db.collection('clientes').doc(cid).get();
-  if(!snap.exists) return;
-  const cli = snap.data();
+  let cli = clientesCache.find(c=>c.id===cid);
+  if(!cli){
+    const snap = await db.collection('clientes').doc(cid).get();
+    if(!snap.exists) return;
+    cli = {id:cid, ...snap.data()};
+  }
   clienteAtualId = cid;
-  await db.collection('clientes').doc(cid).update({_orcAtual:null});
+  orcAtualIdx = null; // novo orçamento
   preencherDadosCliente(cli.dados);
   pecas=[]; savePecas();
   atualizarBarraCliente();
@@ -2382,7 +2480,7 @@ async function novoOrcamentoCliente(cid){
 }
 
 function novoOrcamento(){
-  clienteAtualId=null; pecas=[]; savePecas();
+  clienteAtualId=null; orcAtualIdx=null; pecas=[]; savePecas();
   document.querySelectorAll('#tab-identificacao input, #tab-identificacao select, #tab-identificacao textarea, #tab-endereco input, #tab-endereco select, #tab-endereco textarea').forEach(el=>{
     if(el.id==='col-vend'&&userDoc&&userDoc.role==='vendedora'){el.value=userDoc.vendedoraNome;return;}
     if(el.type==='time') el.value='09:00';
@@ -2397,7 +2495,6 @@ function novoOrcamento(){
   document.getElementById('tab-identificacao').classList.add('active');
   document.querySelector('[onclick="showTab(\'identificacao\',this)"]').classList.add('active');
   renderPecas();
-  gerarCodigoCli(); // gera código automático para novo cliente
 }
 
 async function excluirCliente(cid){
@@ -2423,7 +2520,7 @@ function atualizarBarraCliente(){
   if(clienteAtualId){
     const cli=clientesCache.find(c=>c.id===clienteAtualId);
     bar.style.display='flex';
-    nomeEl.textContent=cli?`${cli.nome} — Orçamento ${(cli._orcAtual!=null?cli._orcAtual+1:'Novo')}`:'Cliente';
+    nomeEl.textContent=cli?`${cli.nome} — Orçamento ${(orcAtualIdx!=null?orcAtualIdx+1:'Novo')}`:'Cliente';
   } else {
     bar.style.display='flex';
     nomeEl.textContent='Novo Orçamento';
@@ -2463,7 +2560,6 @@ async function renderClientes(){
           <div style="font-size:12px;color:#aaa;margin-top:2px">
             ${cli.dados?.bairro?cli.dados.bairro+' — ':''}${cli.dados?.cidade||''}
             · Cadastro: ${cli.createdAt} · Atualizado: ${cli.updatedAt}
-            ${userDoc.role==='admin'&&cli.vendedoras?.length?` · <span style="color:#185fa5">👤 ${cli.vendedoras.join(', ')}</span>`:''}
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
@@ -2477,7 +2573,7 @@ async function renderClientes(){
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
         ${(cli.orcamentos||[]).map((orc,i)=>`
-          <div style="background:#f5f4f0;border-radius:8px;padding:10px 14px;min-width:160px;cursor:pointer;border:2px solid ${clienteAtualId===cli.id&&cli._orcAtual===i?'#2c2c2a':'transparent'}"
+          <div style="background:#f5f4f0;border-radius:8px;padding:10px 14px;min-width:160px;cursor:pointer;border:2px solid ${clienteAtualId===cli.id&&orcAtualIdx===i?'#2c2c2a':'transparent'}"
             onclick="abrirCliente('${cli.id}',${i})">
             <div style="font-size:11px;color:#888;margin-bottom:2px">Orçamento ${i+1}</div>
             <div style="font-size:13px;font-weight:700;color:#0f6e56">${fmt(orc.total||0)}</div>
