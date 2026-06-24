@@ -127,7 +127,8 @@ table.lista tr:hover td{background:#fafaf8}
 
 <div class="tabs">
   <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
-  <button class="tab active" onclick="showTab('cliente',this)">Dados do Cliente</button>
+  <button class="tab active" onclick="showTab('identificacao',this)">📋 Cadastro do Cliente</button>
+  <button class="tab" onclick="showTab('endereco',this)">🚚 Dados da Entrega</button>
   <button class="tab" onclick="showTab('pecas',this)">Fichas de Peças</button>
   <button class="tab" onclick="showTab('orcamento',this)">Orçamento</button>
   <button class="tab" onclick="showTab('costura',this)">Lista de Costura</button>
@@ -154,7 +155,7 @@ table.lista tr:hover td{background:#fafaf8}
       <h2 style="font-size:15px;font-weight:600">Banco de Dados de Clientes</h2>
       <p style="font-size:12px;color:#888;margin-top:2px">Cada cliente tem seus próprios orçamentos salvos</p>
     </div>
-    <button class="btn btn-dark" onclick="novoOrcamento()">➕ Novo Orçamento</button>
+    <button class="btn btn-dark" onclick="novoOrcamento()">➕ Novo Cliente</button>
   </div>
 
   <div style="margin-bottom:14px">
@@ -165,23 +166,17 @@ table.lista tr:hover td{background:#fafaf8}
 </div>
 
 <!-- ===== ABA CLIENTE ===== -->
-<div id="tab-cliente" class="panel active">
+<!-- ===== ABA CADASTRO DO CLIENTE ===== -->
+<div id="tab-identificacao" class="panel active">
   <div class="grid2">
     <div>
       <div class="card">
-        <div class="card-title">Identificação</div>
-        <div class="field"><label>Vendedora</label>
-          <select id="col-vend" style="font-weight:700;font-size:15px;color:#2c2c2a">
-            <option value="">— Selecione a vendedora —</option>
-            <option value="899 - ANDRESA SORATO">899 — ANDRESA SORATO</option>
-            <option value="1.003 - ELISABETH DE SOUZA">1.003 — ELISABETH DE SOUZA</option>
-            <option value="1.039 - JANAINA SILVANO">1.039 — JANAINA SILVANO</option>
-            <option value="1.041 - ELIZABETE CARDOSO">1.041 — ELIZABETE CARDOSO</option>
-            <option value="2.095 - GISLAINE PEREIRA">2.095 — GISLAINE PEREIRA</option>
-            <option value="2.346 - HALICY NIERO">2.346 — HALICY NIERO</option>
-          </select>
+        <div class="card-title">Identificação do Cliente</div>
+        <div class="field"><label>Cód. Cliente Sisgem</label><input id="cod-cli" placeholder="ex: 1.000" oninput="mascaraCodCli(this)"></div>
+        <div class="field">
+          <label>Cód. Cliente <span style="font-size:10px;color:#aaa;font-weight:400">(gerado automaticamente)</span></label>
+          <input id="cod-cli-auto" placeholder="—" readonly style="background:#f5f4f0;color:#2c2c2a;font-weight:700;cursor:default">
         </div>
-        <div class="field"><label>Cód. Cliente</label><input id="cod-cli" placeholder="ex: 1.000" oninput="mascaraCodCli(this)"></div>
         <div class="field"><label>Nome do Cliente</label><input id="cli-nome" placeholder="Nome completo" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
         <div class="field">
           <label>CPF / CNPJ <span id="cpf-status" style="font-size:11px;font-weight:400;color:#888"></span></label>
@@ -197,8 +192,11 @@ table.lista tr:hover td{background:#fafaf8}
         </div>
         <div class="field"><label>Telefone Comercial</label><input id="cli-tel-com" placeholder="(48) 3622-0008" oninput="mascaraTel(this)" maxlength="15"></div>
         <div class="field"><label>E-mail</label><input id="cli-email" type="email" placeholder="email@exemplo.com"></div>
+        <div class="field"><label>Observações</label><textarea id="cli-obs" rows="2"></textarea></div>
       </div>
+    </div>
 
+    <div>
       <div class="card">
         <div class="card-title">Endereço do Cliente</div>
         <div class="field">
@@ -219,7 +217,12 @@ table.lista tr:hover td{background:#fafaf8}
         </div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- ===== ABA DADOS DA ENTREGA / COLOCAÇÃO ===== -->
+<div id="tab-endereco" class="panel">
+  <div class="grid2">
     <div>
       <div class="card" style="background:#fffde7;border-color:#f5e642">
         <div class="card-title" style="color:#b8860b">Dados de Entrega / Colocação</div>
@@ -247,7 +250,9 @@ table.lista tr:hover td{background:#fafaf8}
           <div class="field"><label>Estado</label><input id="col-estado" placeholder="SC" value="SC" style="background:#fff9c4"></div>
         </div>
       </div>
+    </div>
 
+    <div>
       <div class="card">
         <div class="card-title">Responsável / Portaria</div>
         <div class="field"><label>Responsável pelo Recebimento</label><input id="resp-nome" placeholder="Nome do responsável"></div>
@@ -256,31 +261,30 @@ table.lista tr:hover td{background:#fafaf8}
         <div class="field"><label>Horário Permitido de Entrega no Edifício</label><input id="horario-entrega" placeholder="ex: 08h às 18h"></div>
         <div class="field"><label>Quantidade de Peças</label><input id="qtd-pecas" type="number" min="1" value="1"></div>
       </div>
-
-      <div class="card">
-        <div class="card-title">Condição de Pagamento</div>
-        <div class="grid2">
-          <div class="field"><label>Forma de Pagamento</label>
-            <select id="pgto-forma">
-              <option>À Vista</option><option>Carnê</option><option>Cartão</option><option>Cheque</option><option>PIX</option>
-            </select>
-          </div>
-          <div class="field"><label>Entrada (R$)</label><input id="pgto-entrada" type="number" step="0.01" placeholder="0,00"></div>
-        </div>
-        <div class="field"><label>Observações</label><textarea id="cli-obs" rows="2"></textarea></div>
-      </div>
     </div>
   </div>
 </div>
 
 <!-- ===== ABA PEÇAS ===== -->
 <div id="tab-pecas" class="panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div>
-      <h2 style="font-size:15px;font-weight:600">Fichas Técnicas de Peças</h2>
-      <p style="font-size:12px;color:#888;margin-top:2px">Cada ficha corresponde a uma cortina/ambiente</p>
+  <div class="card" style="margin-bottom:14px;background:#f5f4f0;border-color:#e0dfd8">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <label style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px">Vendedora do Orçamento</label>
+        <select id="col-vend" style="font-weight:700;font-size:14px;color:#2c2c2a;width:100%">
+          <option value="">— Selecione a vendedora —</option>
+          <option value="899 - ANDRESA SORATO">899 — ANDRESA SORATO</option>
+          <option value="1.003 - ELISABETH DE SOUZA">1.003 — ELISABETH DE SOUZA</option>
+          <option value="1.039 - JANAINA SILVANO">1.039 — JANAINA SILVANO</option>
+          <option value="1.041 - ELIZABETE CARDOSO">1.041 — ELIZABETE CARDOSO</option>
+          <option value="2.095 - GISLAINE PEREIRA">2.095 — GISLAINE PEREIRA</option>
+          <option value="SEDI">SEDI</option>
+          <option value="RENATA">RENATA</option>
+          <option value="LOJA">LOJA</option>
+        </select>
+      </div>
+      <button class="btn btn-dark" onclick="addPeca()">+ Nova Peça</button>
     </div>
-    <button class="btn btn-dark" onclick="addPeca()">+ Nova Peça</button>
   </div>
   <div id="lista-pecas"><div class="card"><div class="empty">Clique em "Nova Peça" para começar.</div></div></div>
 </div>
@@ -1856,6 +1860,34 @@ function mascaraCodProd(el){
   el.value=v;
 }
 
+async function gerarCodigoCli(){
+  try {
+    if(isLocalMode){
+      const all = JSON.parse(localStorage.getItem('cv2_clientes_teste')||'{}');
+      const codigos = Object.values(all)
+        .map(c=>parseInt((c.dados?.codCliAuto||'0').replace(/\D/g,'')))
+        .filter(n=>!isNaN(n)&&n>0);
+      const proximo = codigos.length ? Math.max(...codigos)+1 : 1;
+      const el = document.getElementById('cod-cli-auto');
+      if(el) el.value = proximo.toLocaleString('pt-BR');
+    } else {
+      const ref = db.collection('config').doc('contador');
+      const snap = await ref.get();
+      let proximo = 1;
+      if(snap.exists){
+        proximo = (snap.data().ultimoCodCli||0)+1;
+        await ref.update({ultimoCodCli: proximo});
+      } else {
+        await ref.set({ultimoCodCli: 1});
+      }
+      const el = document.getElementById('cod-cli-auto');
+      if(el) el.value = proximo.toLocaleString('pt-BR');
+    }
+  } catch(e){
+    console.error('Erro ao gerar código:', e);
+  }
+}
+
 function mascaraCodCli(el){
   let v=el.value.replace(/\D/g,'');
   if(v) v=parseInt(v).toLocaleString('pt-BR');
@@ -2172,13 +2204,10 @@ if(isLocalMode){
       document.getElementById('user-nome').textContent = userDoc.nome;
       document.getElementById('user-role-badge').textContent = userDoc.role==='admin' ? '👑 Admin' : '🏷️ Vendedora';
 
-      // Se vendedora, pré-seleciona e trava o campo vendedora
+      // Se vendedora, pré-seleciona o campo vendedora nas fichas de peças
       if(userDoc.role==='vendedora'){
         const sel = document.getElementById('col-vend');
-        if(sel){
-          sel.value = userDoc.vendedoraNome;
-          sel.disabled = true;
-        }
+        if(sel){ sel.value = userDoc.vendedoraNome; sel.disabled = true; }
       }
 
       renderClientes();
@@ -2205,7 +2234,7 @@ function coletarDadosCliente(){
   return {
     nome: g('cli-nome'), cpf: g('cli-cpf'), rg: g('cli-rg'),
     cel: g('cli-cel'), telRes: g('cli-tel-res'), telCom: g('cli-tel-com'),
-    email: g('cli-email'), vendedora: g('col-vend'), codCli: g('cod-cli'),
+    email: g('cli-email'), vendedora: g('col-vend'), codCli: g('cod-cli'), codCliAuto: g('cod-cli-auto'),
     end: g('cli-end'), num: g('cli-num'), comp: g('cli-comp'), comp2: g('cli-comp2'),
     bairro: g('cli-bairro'), edif: g('cli-edif'), cidade: g('cli-cidade'),
     estado: g('cli-estado'), cep: g('cli-cep'),
@@ -2224,7 +2253,7 @@ function preencherDadosCliente(d){
   const map = {
     'cli-nome':d.nome,'cli-cpf':d.cpf,'cli-rg':d.rg,'cli-cel':d.cel,
     'cli-tel-res':d.telRes,'cli-tel-com':d.telCom,'cli-email':d.email,
-    'cod-cli':d.codCli,'cli-end':d.end,'cli-num':d.num,'cli-comp':d.comp,
+    'cod-cli':d.codCli,'cod-cli-auto':d.codCliAuto,'cli-end':d.end,'cli-num':d.num,'cli-comp':d.comp,
     'cli-comp2':d.comp2,'cli-bairro':d.bairro,'cli-edif':d.edif,
     'cli-cidade':d.cidade,'cli-estado':d.estado,'cli-cep':d.cep,
     'col-data':d.colData,'col-hora':d.colHora,'col-end':d.colEnd,
@@ -2248,7 +2277,7 @@ async function salvarClienteAtual(){
   const dados = coletarDadosCliente();
   if(!dados.nome){ alert('Preencha o nome do cliente antes de salvar.'); return; }
   const total = pecas.reduce((s,p)=>s+(p._total||0),0);
-  const vendedoraNome = userDoc.role==='admin' ? (dados.vendedora||'admin') : userDoc.vendedoraNome;
+  const vendedoraNome = userDoc.role==='admin' ? (g('col-vend')||'') : userDoc.vendedoraNome;
   const temPecas = pecas.length > 0;
 
   try {
@@ -2264,29 +2293,33 @@ async function salvarClienteAtual(){
             data: new Date().toLocaleDateString('pt-BR'),
             pecas: JSON.parse(JSON.stringify(pecas)),
             total, pgto: dados.pgtoForma,
+            vendedoraNome,
           };
           if(cli._orcAtual!=null) orcamentos[cli._orcAtual]=orcamento;
           else orcamentos.push(orcamento);
         }
-        await ref.update({ dados, nome:dados.nome, updatedAt:new Date().toLocaleDateString('pt-BR'), orcamentos, vendedoraNome });
+        // atualiza array de vendedoras para filtro
+        const vendedoras = [...new Set(orcamentos.map(o=>o.vendedoraNome).filter(Boolean))];
+        await ref.update({ dados, nome:dados.nome, updatedAt:new Date().toLocaleDateString('pt-BR'), orcamentos, vendedoras });
       }
     } else {
-      const docData = {
-        nome:dados.nome, dados, vendedoraNome,
-        createdAt:new Date().toLocaleDateString('pt-BR'),
-        updatedAt:new Date().toLocaleDateString('pt-BR'),
-        orcamentos:[], _orcAtual:null,
-      };
+      const orcamentos = [];
       if(temPecas){
-        const orcamento = {
+        orcamentos.push({
           id: Date.now(),
           data: new Date().toLocaleDateString('pt-BR'),
           pecas: JSON.parse(JSON.stringify(pecas)),
           total, pgto: dados.pgtoForma,
-        };
-        docData.orcamentos = [orcamento];
-        docData._orcAtual = 0;
+          vendedoraNome,
+        });
       }
+      const vendedoras = vendedoraNome ? [vendedoraNome] : [];
+      const docData = {
+        nome:dados.nome, dados, vendedoras,
+        createdAt:new Date().toLocaleDateString('pt-BR'),
+        updatedAt:new Date().toLocaleDateString('pt-BR'),
+        orcamentos, _orcAtual: temPecas ? 0 : null,
+      };
       const ref = await db.collection('clientes').add(docData);
       clienteAtualId = ref.id;
     }
@@ -2312,10 +2345,24 @@ async function abrirCliente(cid, orcIdx){
   atualizarBarraCliente();
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-cliente').classList.add('active');
-  document.querySelector('[onclick="showTab(\'cliente\',this)"]').classList.add('active');
+  document.getElementById('tab-identificacao').classList.add('active');
+  document.querySelector('[onclick="showTab(\'identificacao\',this)"]').classList.add('active');
   renderPecas();
   alert(`Cliente "${cli.nome}" carregado — Orçamento ${idx+1} de ${cli.orcamentos.length}`);
+}
+
+async function editarCliente(cid){
+  const snap = await db.collection('clientes').doc(cid).get();
+  if(!snap.exists) return;
+  const cli = snap.data();
+  clienteAtualId = cid;
+  preencherDadosCliente(cli.dados);
+  atualizarBarraCliente();
+  // vai para aba cadastro
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-identificacao').classList.add('active');
+  document.querySelector('[onclick="showTab(\'identificacao\',this)"]').classList.add('active');
 }
 
 async function novoOrcamentoCliente(cid){
@@ -2336,7 +2383,7 @@ async function novoOrcamentoCliente(cid){
 
 function novoOrcamento(){
   clienteAtualId=null; pecas=[]; savePecas();
-  document.querySelectorAll('#tab-cliente input, #tab-cliente select, #tab-cliente textarea').forEach(el=>{
+  document.querySelectorAll('#tab-identificacao input, #tab-identificacao select, #tab-identificacao textarea, #tab-endereco input, #tab-endereco select, #tab-endereco textarea').forEach(el=>{
     if(el.id==='col-vend'&&userDoc&&userDoc.role==='vendedora'){el.value=userDoc.vendedoraNome;return;}
     if(el.type==='time') el.value='09:00';
     else if(el.id==='cli-cidade'||el.id==='col-cidade') el.value='Tubarão';
@@ -2347,9 +2394,10 @@ function novoOrcamento(){
   atualizarBarraCliente();
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-cliente').classList.add('active');
-  document.querySelector('[onclick="showTab(\'cliente\',this)"]').classList.add('active');
+  document.getElementById('tab-identificacao').classList.add('active');
+  document.querySelector('[onclick="showTab(\'identificacao\',this)"]').classList.add('active');
   renderPecas();
+  gerarCodigoCli(); // gera código automático para novo cliente
 }
 
 async function excluirCliente(cid){
@@ -2389,7 +2437,7 @@ async function renderClientes(){
   el.innerHTML='<div class="card"><div class="empty">⏳ Carregando...</div></div>';
   const busca=(document.getElementById('busca-cliente').value||'').toLowerCase();
   let query = db.collection('clientes').orderBy('updatedAt','desc');
-  if(userDoc.role==='vendedora') query=query.where('vendedoraNome','==',userDoc.vendedoraNome);
+  if(userDoc.role==='vendedora') query=query.where('vendedoras','array-contains',userDoc.vendedoraNome);
   const snap=await query.get();
   clientesCache=snap.docs.map(d=>({id:d.id,...d.data()}));
   let lista=clientesCache;
@@ -2415,10 +2463,11 @@ async function renderClientes(){
           <div style="font-size:12px;color:#aaa;margin-top:2px">
             ${cli.dados?.bairro?cli.dados.bairro+' — ':''}${cli.dados?.cidade||''}
             · Cadastro: ${cli.createdAt} · Atualizado: ${cli.updatedAt}
-            ${userDoc.role==='admin'&&cli.vendedoraNome?` · <span style="color:#185fa5">👤 ${cli.vendedoraNome}</span>`:''}
+            ${userDoc.role==='admin'&&cli.vendedoras?.length?` · <span style="color:#185fa5">👤 ${cli.vendedoras.join(', ')}</span>`:''}
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-outline" style="font-size:12px;padding:5px 10px" onclick="editarCliente('${cli.id}')">✏️ Editar</button>
           <button class="btn btn-outline" style="font-size:12px;padding:5px 10px" onclick="novoOrcamentoCliente('${cli.id}')">➕ Novo Orç.</button>
           <button class="btn btn-red" style="font-size:12px;padding:5px 10px" onclick="excluirCliente('${cli.id}')">🗑️</button>
         </div>
@@ -2433,7 +2482,7 @@ async function renderClientes(){
             <div style="font-size:11px;color:#888;margin-bottom:2px">Orçamento ${i+1}</div>
             <div style="font-size:13px;font-weight:700;color:#0f6e56">${fmt(orc.total||0)}</div>
             <div style="font-size:11px;color:#aaa;margin-top:2px">${orc.data} · ${orc.pecas.length} peça(s)</div>
-            <div style="font-size:11px;color:#666;margin-top:2px">${orc.pgto||''}</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">${orc.pgto||''}${orc.vendedoraNome?' · 👤 '+orc.vendedoraNome:''}</div>
             <button onclick="event.stopPropagation();excluirOrcamentoCliente('${cli.id}',${i})"
               style="margin-top:6px;background:none;border:none;color:#ccc;font-size:11px;cursor:pointer;padding:0">🗑️ excluir</button>
           </div>`).join('')}
